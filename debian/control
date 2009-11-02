@@ -2,8 +2,8 @@ Source: jbig2dec
 Section: core
 Priority: optional
 Maintainer: Mikhail Gusarov <dottedmag@dottedmag.net>
-Build-Depends: debhelper (>= 7)
-XCS-Cross-Host-Build-Depends: debhelper (>= 7)
+Build-Depends: debhelper (>= 7), autoconf, automake, libtool
+XCS-Cross-Host-Build-Depends: debhelper (>= 7), autoconf, automake, libtool
 XCS-Cross-Build-Depends:
 Standards-Version: 3.8.3
 Homepage: http://jbig2dec.sourceforge.net/
