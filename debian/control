@@ -1,0 +1,61 @@
+Source: jbig2dec
+Section: core
+Priority: optional
+Maintainer: Mikhail Gusarov <dottedmag@dottedmag.net>
+Build-Depends: debhelper (>= 7)
+XCS-Cross-Host-Build-Depends: debhelper (>= 7)
+XCS-Cross-Build-Depends:
+Standards-Version: 3.8.3
+Homepage: http://jbig2dec.sourceforge.net/
+
+Package: libjbig2dec0
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: decoder implementation of the JBIG2
+ JBIG2 is designed for lossy or lossless encoding of 'bilevel' (1-bit
+ monochrome) images at moderately high resolution, and in particular scanned
+ paper documents. In this domain it is very efficient, offering compression
+ ratios on the order of 100:1.
+ .
+ This is a decoder only implementation.
+
+Package: libjbig2dec-dev
+Section: libdevel
+Architecture: any
+Depends: libjbig2dec0 (= ${binary:Version}), ${misc:Depends}, ${shlibs:Depends}
+Description: decoder implementation of the JBIG2 -- development files
+ JBIG2 is designed for lossy or lossless encoding of 'bilevel' (1-bit
+ monochrome) images at moderately high resolution, and in particular scanned
+ paper documents. In this domain it is very efficient, offering compression
+ ratios on the order of 100:1.
+ .
+ This is a decoder only implementation.
+ .
+ This package contains headers and files necessary to link with library.
+
+Package: jbig2dec-utils
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: decoder implementation of the JBIG2 -- utilities
+ JBIG2 is designed for lossy or lossless encoding of 'bilevel' (1-bit
+ monochrome) images at moderately high resolution, and in particular scanned
+ paper documents. In this domain it is very efficient, offering compression
+ ratios on the order of 100:1.
+ .
+ This is a decoder only implementation.
+ .
+ This package contains command-line utilities.
+
+Package: libjbig2dec0-dbg
+Section: debug
+Architecture: any
+Depends: ${misc:Depends}, libjbig2dec0 (= ${binary:Version})
+Description: decoder implementation of the JBIG2 -- debugging information
+ JBIG2 is designed for lossy or lossless encoding of 'bilevel' (1-bit
+ monochrome) images at moderately high resolution, and in particular scanned
+ paper documents. In this domain it is very efficient, offering compression
+ ratios on the order of 100:1.
+ .
+ This is a decoder only implementation.
+ .
+ This package contains debugging information for binaries.
