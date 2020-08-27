@@ -414,7 +414,7 @@ test_get_word(Jbig2Ctx *ctx, Jbig2WordStream *self, size_t offset, uint32_t *wor
 }
 
 int
-main(int argc, char **argv)
+main(int argc, const char **argv)
 {
     Jbig2Ctx *ctx;
     Jbig2WordStream ws;

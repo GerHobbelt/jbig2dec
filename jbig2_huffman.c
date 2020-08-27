@@ -2141,7 +2141,7 @@ static int test2()
 }
 
 int
-main(int argc, char **argv)
+main(int argc, const char **argv)
 {
     return test1() && test2() ? 0 : 1;
 }
