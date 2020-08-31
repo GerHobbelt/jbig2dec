@@ -229,7 +229,7 @@ cleanup1:
     /* 6.4.5 (1) */
     jbig2_image_clear(ctx, image, params->SBDEFPIXEL);
 
-	_CrtCheckMemory();
+	//_CrtCheckMemory();
 
     /* 6.4.6 */
     if (params->SBHUFF) {
@@ -959,7 +959,7 @@ jbig2_text_region(Jbig2Ctx *ctx, Jbig2Segment *segment, const byte *segment_data
             SBNUMSYMS += dicts[index]->n_symbols;
         }
 
-		_CrtCheckMemory();
+		//_CrtCheckMemory();
 
         params.IADT = jbig2_arith_int_ctx_new(ctx);
         params.IAFS = jbig2_arith_int_ctx_new(ctx);
