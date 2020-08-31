@@ -68,7 +68,7 @@ jbig2_alloc(Jbig2Allocator *allocator, size_t size, size_t num)
     the full size of the allocation. */
     if (num > 0 && size > SIZE_MAX / num)
         return NULL;
-    return allocator->alloc(allocator, size * num);
+    return allocator->alloc_(allocator, size * num);
 }
 
 /* jbig2_free and jbig2_realloc moved to the bottom of this file */
@@ -556,7 +556,7 @@ jbig2_word_stream_buf_free(Jbig2Ctx *ctx, Jbig2WordStream *ws)
 void
 jbig2_free(Jbig2Allocator *allocator, void *p)
 {
-    allocator->free(allocator, p);
+    allocator->free_(allocator, p);
 }
 
 void *
@@ -565,5 +565,5 @@ jbig2_realloc(Jbig2Allocator *allocator, void *p, size_t size, size_t num)
     /* check for integer multiplication overflow */
     if (num > 0 && size >= SIZE_MAX / num)
         return NULL;
-    return allocator->realloc(allocator, p, size * num);
+    return allocator->realloc_(allocator, p, size * num);
 }

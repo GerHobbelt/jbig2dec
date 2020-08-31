@@ -75,9 +75,9 @@ typedef void (*Jbig2ErrorCallback)(void *data, const char *msg, Jbig2Severity se
 
 /* dynamic memory callbacks */
 struct _Jbig2Allocator {
-    void *(*alloc)(Jbig2Allocator *allocator, size_t size);
-    void (*free)(Jbig2Allocator *allocator, void *p);
-    void *(*realloc)(Jbig2Allocator *allocator, void *p, size_t size);
+    void *(*alloc_)(Jbig2Allocator *allocator, size_t size);
+    void (*free_)(Jbig2Allocator *allocator, void *p);
+    void *(*realloc_)(Jbig2Allocator *allocator, void *p, size_t size);
 };
 
 /* decoder context */
