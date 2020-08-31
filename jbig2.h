@@ -56,8 +56,8 @@ struct _Jbig2Image {
     uint32_t width;
     uint32_t height;
     uint32_t stride;
-    uint8_t *data;
-    int refcount;
+	int32_t refcount;
+	uint8_t *data;
 };
 
 /* errors are returned from the library via a callback. If no callback
