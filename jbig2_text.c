@@ -229,6 +229,8 @@ cleanup1:
     /* 6.4.5 (1) */
     jbig2_image_clear(ctx, image, params->SBDEFPIXEL);
 
+	_CrtCheckMemory();
+
     /* 6.4.6 */
     if (params->SBHUFF) {
         STRIPT = jbig2_huffman_get(hs, params->SBHUFFDT, &code);
@@ -956,6 +958,8 @@ jbig2_text_region(Jbig2Ctx *ctx, Jbig2Segment *segment, const byte *segment_data
         for (index = 0; index < n_dicts; index++) {
             SBNUMSYMS += dicts[index]->n_symbols;
         }
+
+		_CrtCheckMemory();
 
         params.IADT = jbig2_arith_int_ctx_new(ctx);
         params.IAFS = jbig2_arith_int_ctx_new(ctx);

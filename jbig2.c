@@ -27,6 +27,9 @@
 #include <stdarg.h>
 #include <string.h>
 #include <limits.h>
+#if defined(_MSC_VER)
+#include <crtdbg.h>
+#endif
 
 #include "jbig2.h"
 #include "jbig2_priv.h"
@@ -545,7 +548,7 @@ jbig2_word_stream_buf_free(Jbig2Ctx *ctx, Jbig2WordStream *ws)
  * turned into ->Memento_free and ->Memento_realloc, which is
  * obviously problematic. Undefine free and realloc here to
  * avoid this. */
-#ifdef MEMENTO
+#if defined(free) || defined(realloc)
 #undef free
 #undef realloc
 #endif
