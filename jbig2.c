@@ -27,6 +27,9 @@
 #include <stdarg.h>
 #include <string.h>
 #include <limits.h>
+#if defined(_MSC_VER)
+#include <crtdbg.h>
+#endif
 
 #include "jbig2.h"
 #include "jbig2_priv.h"
