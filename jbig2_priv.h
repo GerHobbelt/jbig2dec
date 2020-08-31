@@ -115,15 +115,15 @@ uint16_t jbig2_get_uint16(const byte *bptr);
 int16_t jbig2_get_int16(const byte *buf);
 
 /* dynamic memory management */
-void *jbig2_alloc(Jbig2Allocator *allocator, size_t size, size_t num);
+void *jbig2_alloc(Jbig2Allocator *allocator, size_t size, size_t num, const char* __file, int __line);
 
 void jbig2_free(Jbig2Allocator *allocator, void *p);
 
-void *jbig2_realloc(Jbig2Allocator *allocator, void *p, size_t size, size_t num);
+void *jbig2_realloc(Jbig2Allocator *allocator, void *p, size_t size, size_t num, const char* __file, int __line);
 
-#define jbig2_new(ctx, t, size) ((t *)jbig2_alloc(ctx->allocator, size, sizeof(t)))
+#define jbig2_new(ctx, t, size) ((t *)jbig2_alloc(ctx->allocator, size, sizeof(t), __FILE__, __LINE__))
 
-#define jbig2_renew(ctx, p, t, size) ((t *)jbig2_realloc(ctx->allocator, (p), size, sizeof(t)))
+#define jbig2_renew(ctx, p, t, size) ((t *)jbig2_realloc(ctx->allocator, (p), size, sizeof(t), __FILE__, __LINE__))
 
 int jbig2_error(Jbig2Ctx *ctx, Jbig2Severity severity, uint32_t seg_idx, const char *fmt, ...)
 #ifdef __GNUC__

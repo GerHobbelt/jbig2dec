@@ -56,8 +56,8 @@ struct _Jbig2Image {
     uint32_t width;
     uint32_t height;
     uint32_t stride;
-    uint8_t *data;
-    int refcount;
+	int32_t refcount;
+	uint8_t *data;
 };
 
 /* errors are returned from the library via a callback. If no callback
@@ -75,9 +75,9 @@ typedef void (*Jbig2ErrorCallback)(void *data, const char *msg, Jbig2Severity se
 
 /* dynamic memory callbacks */
 struct _Jbig2Allocator {
-    void *(*alloc)(Jbig2Allocator *allocator, size_t size);
+    void *(*alloc)(Jbig2Allocator *allocator, size_t size, const char* __file, int __line);
     void (*free)(Jbig2Allocator *allocator, void *p);
-    void *(*realloc)(Jbig2Allocator *allocator, void *p, size_t size);
+    void *(*realloc)(Jbig2Allocator *allocator, void *p, size_t size, const char* __file, int __line);
 };
 
 /* decoder context */

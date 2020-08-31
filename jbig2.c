@@ -38,9 +38,9 @@
 #include "jbig2_segment.h"
 
 static void *
-jbig2_default_alloc(Jbig2Allocator *allocator, size_t size)
+jbig2_default_alloc(Jbig2Allocator *allocator, size_t size, const char *__file, int __line)
 {
-    return malloc(size);
+    return _malloc_dbg(size, _NORMAL_BLOCK, __file, __line);
 }
 
 static void
@@ -50,9 +50,9 @@ jbig2_default_free(Jbig2Allocator *allocator, void *p)
 }
 
 static void *
-jbig2_default_realloc(Jbig2Allocator *allocator, void *p, size_t size)
+jbig2_default_realloc(Jbig2Allocator *allocator, void *p, size_t size, const char* __file, int __line)
 {
-    return realloc(p, size);
+    return _realloc_dbg(p, size, _NORMAL_BLOCK, __file, __line);
 }
 
 static Jbig2Allocator jbig2_default_allocator = {
@@ -62,13 +62,13 @@ static Jbig2Allocator jbig2_default_allocator = {
 };
 
 void *
-jbig2_alloc(Jbig2Allocator *allocator, size_t size, size_t num)
+jbig2_alloc(Jbig2Allocator *allocator, size_t size, size_t num, const char* __file, int __line)
 {
     /* Check for integer multiplication overflow when computing
     the full size of the allocation. */
     if (num > 0 && size > SIZE_MAX / num)
         return NULL;
-    return allocator->alloc(allocator, size * num);
+    return allocator->alloc(allocator, size * num, __file, __line);
 }
 
 /* jbig2_free and jbig2_realloc moved to the bottom of this file */
@@ -121,7 +121,7 @@ jbig2_ctx_new_imp(Jbig2Allocator *allocator, Jbig2Options options, Jbig2GlobalCt
     if (error_callback == NULL)
         error_callback = &jbig2_default_error;
 
-    result = (Jbig2Ctx *) jbig2_alloc(allocator, sizeof(Jbig2Ctx), 1);
+    result = (Jbig2Ctx *) jbig2_alloc(allocator, sizeof(Jbig2Ctx), 1, __FILE__, __LINE__);
     if (result == NULL) {
         error_callback(error_callback_data, "failed to allocate initial context", JBIG2_SEVERITY_FATAL, JBIG2_UNKNOWN_SEGMENT_NUMBER);
         return NULL;
@@ -452,9 +452,9 @@ jbig2_ctx_free(Jbig2Ctx *ctx)
     }
 
     if (ctx->pages != NULL) {
-        for (i = 0; i <= ctx->current_page; i++)
-            if (ctx->pages[i].image != NULL)
-                jbig2_image_release(ctx, ctx->pages[i].image);
+		for (i = 0; i <= ctx->current_page; i++)
+			if (ctx->pages[i].image != NULL)
+				jbig2_image_release(ctx, ctx->pages[i].image);
         jbig2_free(ca, ctx->pages);
     }
 
@@ -560,10 +560,10 @@ jbig2_free(Jbig2Allocator *allocator, void *p)
 }
 
 void *
-jbig2_realloc(Jbig2Allocator *allocator, void *p, size_t size, size_t num)
+jbig2_realloc(Jbig2Allocator *allocator, void *p, size_t size, size_t num, const char *__file, int __line)
 {
     /* check for integer multiplication overflow */
     if (num > 0 && size >= SIZE_MAX / num)
         return NULL;
-    return allocator->realloc(allocator, p, size * num);
+    return allocator->realloc(allocator, p, size * num, __file, __line);
 }

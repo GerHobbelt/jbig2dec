@@ -29,7 +29,7 @@ typedef enum {
 } Jbig2ComposeOp;
 
 Jbig2Image *jbig2_image_new(Jbig2Ctx *ctx, uint32_t width, uint32_t height);
-void jbig2_image_release(Jbig2Ctx *ctx, Jbig2Image *image);
+int jbig2_image_release(Jbig2Ctx *ctx, Jbig2Image *image);
 Jbig2Image *jbig2_image_reference(Jbig2Ctx *ctx, Jbig2Image *image);
 void jbig2_image_free(Jbig2Ctx *ctx, Jbig2Image *image);
 void jbig2_image_clear(Jbig2Ctx *ctx, Jbig2Image *image, int value);

@@ -75,20 +75,34 @@ jbig2_image_new(Jbig2Ctx *ctx, uint32_t width, uint32_t height)
 Jbig2Image *
 jbig2_image_reference(Jbig2Ctx *ctx, Jbig2Image *image)
 {
-    if (image)
-        image->refcount++;
+	if (image)
+	{
+		image->refcount++;
+		if (image->refcount <= 0 || image->refcount > 100000)
+		{
+			fprintf(stderr, "corrupted refcount %d?\n", (int)image->refcount);
+		}
+	}
     return image;
 }
 
-/* release an image pointer, freeing it it appropriate */
-void
+/* release an image pointer, freeing it is appropriate */
+int
 jbig2_image_release(Jbig2Ctx *ctx, Jbig2Image *image)
 {
     if (image == NULL)
-        return;
+        return 1;
     image->refcount--;
-    if (image->refcount == 0)
-        jbig2_image_free(ctx, image);
+	if (image->refcount < 0 || image->refcount > 100000)
+	{
+		fprintf(stderr, "corrupted refcount %d?\n", (int)image->refcount);
+	}
+	if (image->refcount == 0)
+	{
+		jbig2_image_free(ctx, image);
+		return 1;
+	}
+	return 0;
 }
 
 /* free a Jbig2Image structure and its associated memory */
