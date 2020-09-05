@@ -1,4 +1,4 @@
-/* Copyright (C) 2001-2020 Artifex Software, Inc.
+﻿/* Copyright (C) 2001-2020 Artifex Software, Inc.
    All Rights Reserved.
 
    This software is provided AS-IS with no warranty, either express or
@@ -29,6 +29,14 @@
 #include "jbig2.h"
 #include "jbig2_priv.h"
 #include "jbig2_image.h"
+
+#ifdef HAVE_MUPDF
+// for fz_error():
+#include "mupdf/fitz/version.h"
+#include "mupdf/fitz/config.h"
+#include "mupdf/fitz/system.h"
+#include "mupdf/fitz/context.h"
+#endif
 
 /* allocate a Jbig2Image structure and its associated bitmap */
 Jbig2Image *
@@ -80,7 +88,11 @@ jbig2_image_reference(Jbig2Ctx *ctx, Jbig2Image *image)
 		image->refcount++;
 		if (image->refcount <= 0 || image->refcount > 100000)
 		{
-			fprintf(stderr, "corrupted refcount %d?\n", (int)image->refcount);
+#ifdef HAVE_MUPDF
+			fz_error(NULL, "*!* corrupted refcount %d?\n", (int)image->refcount);
+#else
+			fprintf(stderr, "*!* corrupted refcount %d?\n", (int)image->refcount);
+#endif
 		}
 	}
     return image;
@@ -95,7 +107,11 @@ jbig2_image_release(Jbig2Ctx *ctx, Jbig2Image *image)
     image->refcount--;
 	if (image->refcount < 0 || image->refcount > 100000)
 	{
-		fprintf(stderr, "corrupted refcount %d?\n", (int)image->refcount);
+#ifdef HAVE_MUPDF
+		fz_error(NULL, "*!* corrupted refcount %d?\n", (int)image->refcount);
+#else
+		fprintf(stderr, "*!* corrupted refcount %d?\n", (int)image->refcount);
+#endif
 	}
 	if (image->refcount == 0)
 	{

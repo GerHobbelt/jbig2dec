@@ -37,22 +37,43 @@
 #include "jbig2_page.h"
 #include "jbig2_segment.h"
 
+#ifdef HAVE_MUPDF
+// for fz_error():
+#include "mupdf/fitz/version.h"
+#include "mupdf/fitz/config.h"
+#include "mupdf/fitz/system.h"
+#include "mupdf/fitz/context.h"
+#include "mupdf/fitz/output.h"
+#endif
+
 static void *
 jbig2_default_alloc(Jbig2Allocator *allocator, size_t size)
 {
-    return malloc(size);
+#ifdef HAVE_MUPDF
+	return fz_malloc(fz_get_global_context(), size);
+#else
+	return malloc(size);
+#endif
 }
 
 static void
 jbig2_default_free(Jbig2Allocator *allocator, void *p)
 {
-    free(p);
+#ifdef HAVE_MUPDF
+	fz_free(fz_get_global_context(), p);
+#else
+	free(p);
+#endif
 }
 
 static void *
 jbig2_default_realloc(Jbig2Allocator *allocator, void *p, size_t size)
 {
-    return realloc(p, size);
+#ifdef HAVE_MUPDF
+	return fz_realloc(fz_get_global_context(), p, size);
+#else
+	return realloc(p, size);
+#endif
 }
 
 static Jbig2Allocator jbig2_default_allocator = {
@@ -76,14 +97,31 @@ jbig2_alloc(Jbig2Allocator *allocator, size_t size, size_t num)
 static void
 jbig2_default_error(void *data, const char *msg, Jbig2Severity severity, uint32_t seg_idx)
 {
-    /* report only fatal errors by default */
+#ifdef HAVE_MUPDF
+	fz_context* ctx = NULL;
+	char idxbuf[50] = "";
+
+	if (seg_idx != JBIG2_UNKNOWN_SEGMENT_NUMBER)
+		fz_snprintf(idxbuf, sizeof idxbuf, " (segment 0x%02x)", seg_idx);
+
+	if (severity == JBIG2_SEVERITY_FATAL)
+		fz_error(ctx, "jbig2dec error: %s%s", msg, idxbuf);
+	else if (severity == JBIG2_SEVERITY_WARNING)
+		fz_warn(ctx, "jbig2dec warning: %s%s", msg, idxbuf);
+	else if (severity == JBIG2_SEVERITY_INFO)
+		fz_info(ctx, "jbig2dec info: %s%s", msg, idxbuf);
+	else
+		fz_info(ctx, "jbig2dec debug: %s%s", msg, idxbuf);
+#else
+	/* report only fatal errors by default */
     if (severity == JBIG2_SEVERITY_FATAL) {
-        fprintf(stderr, "jbig2 decoder FATAL ERROR: %s", msg);
+		fprintf(stderr, "jbig2 decoder FATAL ERROR: %s", msg);
         if (seg_idx != JBIG2_UNKNOWN_SEGMENT_NUMBER)
             fprintf(stderr, " (segment 0x%02x)", seg_idx);
         fprintf(stderr, "\n");
         fflush(stderr);
     }
+#endif
 }
 
 int
@@ -107,7 +145,12 @@ jbig2_ctx_new_imp(Jbig2Allocator *allocator, Jbig2Options options, Jbig2GlobalCt
 {
     Jbig2Ctx *result;
 
-    if (jbig2_version_major != JBIG2_VERSION_MAJOR || jbig2_version_minor != JBIG2_VERSION_MINOR) {
+	if (allocator == NULL)
+		allocator = &jbig2_default_allocator;
+	if (error_callback == NULL)
+		error_callback = &jbig2_default_error;
+
+	if (jbig2_version_major != JBIG2_VERSION_MAJOR || jbig2_version_minor != JBIG2_VERSION_MINOR) {
         Jbig2Ctx fakectx;
         fakectx.error_callback = error_callback;
         fakectx.error_callback_data = error_callback_data;
@@ -115,11 +158,6 @@ jbig2_ctx_new_imp(Jbig2Allocator *allocator, Jbig2Options options, Jbig2GlobalCt
             jbig2_version_major, jbig2_version_minor, JBIG2_VERSION_MAJOR, JBIG2_VERSION_MINOR);
         return NULL;
     }
-
-    if (allocator == NULL)
-        allocator = &jbig2_default_allocator;
-    if (error_callback == NULL)
-        error_callback = &jbig2_default_error;
 
     result = (Jbig2Ctx *) jbig2_alloc(allocator, sizeof(Jbig2Ctx), 1);
     if (result == NULL) {
