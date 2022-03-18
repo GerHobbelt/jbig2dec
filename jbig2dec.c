@@ -46,6 +46,8 @@
 #include "jbig2_image.h"
 #include "jbig2_image_rw.h"
 
+#undef verbose
+
 typedef enum {
     usage, dump, render
 } jbig2dec_mode;
@@ -267,7 +269,7 @@ set_output_format(jbig2dec_params_t *params, const char *format)
 }
 
 static int
-parse_options(int argc, char *argv[], jbig2dec_params_t *params)
+parse_options(int argc, const char *argv[], jbig2dec_params_t *params)
 {
     static struct option long_options[] = {
         {"version", 0, NULL, 'V'},
@@ -562,8 +564,11 @@ write_document_hash(jbig2dec_params_t *params)
     return 0;
 }
 
-int
-main(int argc, char **argv)
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr)      jbig2dec_main(cnt, arr)
+#endif
+
+int main(int argc, const char** argv)
 {
     jbig2dec_params_t params;
     jbig2dec_error_callback_state_t error_callback_state;
@@ -608,7 +613,7 @@ main(int argc, char **argv)
 
         if ((argc - filearg) == 1) {
             /* only one argument--open as a jbig2 file */
-            char *fn = argv[filearg];
+			const char *fn = argv[filearg];
 
             f = fopen(fn, "rb");
             if (f == NULL) {
@@ -617,8 +622,8 @@ main(int argc, char **argv)
             }
         } else if ((argc - filearg) == 2) {
             /* two arguments open as separate global and page streams */
-            char *fn = argv[filearg];
-            char *fn_page = argv[filearg + 1];
+			const char *fn = argv[filearg];
+			const char *fn_page = argv[filearg + 1];
 
             f = fopen(fn, "rb");
             if (f == NULL) {
@@ -642,9 +647,9 @@ main(int argc, char **argv)
             allocator = NULL;
         else
         {
-            allocator->super.alloc = jbig2dec_alloc;
-            allocator->super.free = jbig2dec_free;
-            allocator->super.realloc = jbig2dec_realloc;
+            allocator->super.alloc_ = jbig2dec_alloc;
+            allocator->super.free_ = jbig2dec_free;
+            allocator->super.realloc_ = jbig2dec_realloc;
             allocator->ctx = NULL;
             allocator->memory_limit = params.memory_limit;
             allocator->memory_used = 0;

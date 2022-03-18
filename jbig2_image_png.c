@@ -135,7 +135,7 @@ jbig2_image_write_png(Jbig2Image *image, FILE *out)
 }
 
 int
-jbig2_image_write_png_file(Jbig2Image *image, char *filename)
+jbig2_image_write_png_file(Jbig2Image *image, const char *filename)
 {
     FILE *out;
     int code;

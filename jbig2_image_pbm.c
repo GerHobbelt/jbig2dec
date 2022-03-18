@@ -33,7 +33,7 @@
 /* take an image structure and write it to a file in pbm format */
 
 int
-jbig2_image_write_pbm_file(Jbig2Image *image, char *filename)
+jbig2_image_write_pbm_file(Jbig2Image *image, const char *filename)
 {
     FILE *out;
     int code;
@@ -68,7 +68,7 @@ jbig2_image_write_pbm(Jbig2Image *image, FILE *out)
 
 /* take an image from a file in pbm format */
 Jbig2Image *
-jbig2_image_read_pbm_file(Jbig2Ctx *ctx, char *filename)
+jbig2_image_read_pbm_file(Jbig2Ctx *ctx, const char *filename)
 {
     FILE *in;
     Jbig2Image *image;

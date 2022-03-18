@@ -35,10 +35,15 @@
 #include "jbig2_image.h"
 #include "jbig2_image_rw.h"
 
-int
-main(int argc, char *argv[])
+#ifdef HAVE_LIBPNG
+
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr)      jbig2dec_pbm2png_main(cnt, arr)
+#endif
+
+int main(int argc, const char** argv)
 {
-    Jbig2Ctx *ctx;
+	Jbig2Ctx *ctx;
     Jbig2Image *image;
     int code;
 
@@ -65,3 +70,5 @@ main(int argc, char *argv[])
 
     return (code);
 }
+
+#endif

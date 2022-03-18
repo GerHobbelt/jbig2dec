@@ -27,7 +27,9 @@
 #define COMPILING_MEMENTO_C
 
 /* SHUT UP, MSVC. I KNOW WHAT I AM DOING. */
+#ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
+#endif
 
 /* We have some GS specific tweaks; more for the GS build environment than
  * anything else. */
