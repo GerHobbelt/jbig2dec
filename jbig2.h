@@ -69,6 +69,20 @@ struct _Jbig2Image {
 #define JBIG2_UNKNOWN_SEGMENT_NUMBER ~0U
 typedef void (*Jbig2ErrorCallback)(void *data, const char *msg, Jbig2Severity severity, uint32_t seg_idx);
 
+/* set the 'noise floor' for error/warning/info/debug logging:
+   specify the lowest level of logging you wish to see pass
+   through the error callback at all.
+
+   This level helps optimize the run-time speed by short-circuiting
+   error/warn/etc. message production when those are for a level
+   you do not want to see/process anyway.
+
+   Minimum accepted level: JBIG2_SEVERITY_WARNING
+   I.e. warnings and errors will ALWAYS make it through to the
+   registered error callback function.
+*/
+void jbig2_set_error_log_prefilter_level(Jbig2Severity level);
+
 /* memory allocation is likewise done via a set of callbacks so that
    clients can better control memory usage. If a NULL is passed for
    this argument of jbig2_ctx_new, a default allocator based on malloc()

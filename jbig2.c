@@ -129,12 +129,25 @@ jbig2_default_error(void *data, const char *msg, Jbig2Severity severity, uint32_
 #endif
 }
 
+static Jbig2Severity prefilter_error_log_level = JBIG2_SEVERITY_WARNING;
+
+void jbig2_set_error_log_prefilter_level(Jbig2Severity level)
+{
+	if (level > JBIG2_SEVERITY_WARNING)
+		level = JBIG2_SEVERITY_WARNING;
+	prefilter_error_log_level = level;
+}
+
 int
 jbig2_error(Jbig2Ctx *ctx, Jbig2Severity severity, uint32_t segment_number, const char *fmt, ...)
 {
     char buf[1024];
     va_list ap;
     int n;
+
+	// short-circuit the error callback/logger for (very) low severity messages:
+	if (severity < prefilter_error_log_level)
+		return -1;
 
     va_start(ap, fmt);
     n = vsnprintf(buf, sizeof(buf), fmt, ap);
