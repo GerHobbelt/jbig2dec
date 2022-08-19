@@ -39,6 +39,10 @@
 #include "jbig2_symbol_dict.h"
 #include "jbig2_text.h"
 
+#ifdef HAVE_MUPDF
+#include "mupdf/assert.h"
+#endif
+
 /**
  * jbig2_decode_text_region: decode a text region segment
  *
@@ -358,6 +362,13 @@ cleanup1:
                     jbig2_error(ctx, JBIG2_SEVERITY_WARNING, segment->number, "missing glyph (%d/%d), ignoring", index, id);
                 } else {
                     IB = jbig2_image_reference(ctx, dicts[index]->glyphs[id]);
+					ASSERT(IB);
+					if (IB->data == (void*)0xddddddddddddddddULL)
+					{
+						id++;
+						id--;
+					}
+					ASSERT(IB->data != (void*)0xddddddddddddddddULL);
                 }
             }
             if (params->SBREFINE) {

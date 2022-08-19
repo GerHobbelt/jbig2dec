@@ -36,6 +36,7 @@
 #include "mupdf/fitz/config.h"
 #include "mupdf/fitz/system.h"
 #include "mupdf/fitz/context.h"
+#include "mupdf/assert.h"
 #endif
 
 /* allocate a Jbig2Image structure and its associated bitmap */
@@ -408,6 +409,7 @@ jbig2_image_compose(Jbig2Ctx *ctx, Jbig2Image *dst, Jbig2Image *src, int x, int 
     w = src->width;
     h = src->height;
     shift = (x & 7);
+	ASSERT(src->data != (void *)0xddddddddddddddddULL);
     ss = src->data - early;
 
     if (x < 0) {

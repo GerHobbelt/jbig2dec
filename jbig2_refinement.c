@@ -39,6 +39,7 @@
 #include "jbig2_page.h"
 #include "jbig2_refinement.h"
 #include "jbig2_segment.h"
+#include "jbig2_image_rw.h"
 
 #define pixel_outside_field(x, y) \
     ((y) < -128 || (y) > 0 || (x) < -128 || ((y) < 0 && (x) > 127) || ((y) == 0 && (x) >= 0))
@@ -88,7 +89,7 @@ jbig2_decode_refinement_template0_unopt(Jbig2Ctx *ctx,
     }
 #ifdef JBIG2_DEBUG_DUMP
     {
-        static count = 0;
+        static int count = 0;
         char name[32];
         int code;
 
@@ -143,15 +144,26 @@ jbig2_decode_refinement_template1_unopt(Jbig2Ctx *ctx,
 
 #ifdef JBIG2_DEBUG_DUMP
     {
-        static count = 0;
+        static int count = 0;
         char name[32];
+		int code;
 
-        snprintf(name, 32, "refin-%d.pbm", count);
-        code = jbig2_image_write_pbm_file(ref, name);
+#ifdef HAVE_LIBPNG
+		snprintf(name, 32, "refin-%d.png", count);
+		code = jbig2_image_write_png_file(ref, name);
+#else
+		snprintf(name, 32, "refin-%d.pbm", count);
+		code = jbig2_image_write_pbm_file(ref, name);
+#endif
         if (code < 0)
             return jbig2_error(ctx, JBIG2_SEVERITY_WARNING, segment->number, "failed to write refinement input");
-        snprintf(name, 32, "refout-%d.pbm", count);
-        code = jbig2_image_write_pbm_file(image, name);
+#ifdef HAVE_LIBPNG
+		snprintf(name, 32, "refout-%d.png", count);
+		code = jbig2_image_write_png_file(image, name);
+#else
+		snprintf(name, 32, "refout-%d.pbm", count);
+		code = jbig2_image_write_pbm_file(image, name);
+#endif
         if (code < 0)
             return jbig2_error(ctx, JBIG2_SEVERITY_WARNING, segment->number, "failed to write refinement output");
         count++;

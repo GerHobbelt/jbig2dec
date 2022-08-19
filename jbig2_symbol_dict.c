@@ -44,6 +44,7 @@
 #include "jbig2_segment.h"
 #include "jbig2_symbol_dict.h"
 #include "jbig2_text.h"
+#include "jbig2_image_rw.h"
 
 /* Table 13 */
 typedef struct {
@@ -78,15 +79,17 @@ jbig2_dump_symbol_dict(Jbig2Ctx *ctx, Jbig2Segment *segment)
         return;
     jbig2_error(ctx, JBIG2_SEVERITY_INFO, segment->number, "dumping symbol dictionary as %d individual png files", dict->n_symbols);
     for (index = 0; index < dict->n_symbols; index++) {
-        snprintf(filename, sizeof(filename), "symbol_%02d-%04d.png", segment->number, index);
-        jbig2_error(ctx, JBIG2_SEVERITY_DEBUG, segment->number, "dumping symbol %d/%d as '%s'", index, dict->n_symbols, filename);
 #ifdef HAVE_LIBPNG
-        code = jbig2_image_write_png_file(dict->glyphs[index], filename);
+		snprintf(filename, sizeof(filename), "symbol_%02d-%04d.png", segment->number, index);
+		jbig2_error(ctx, JBIG2_SEVERITY_DEBUG, segment->number, "dumping symbol %d/%d as '%s'", index, dict->n_symbols, filename);
+		code = jbig2_image_write_png_file(dict->glyphs[index], filename);
 #else
-        code = jbig2_image_write_pbm_file(dict->glyphs[index], filename);
+		snprintf(filename, sizeof(filename), "symbol_%02d-%04d.pbm", segment->number, index);
+		jbig2_error(ctx, JBIG2_SEVERITY_DEBUG, segment->number, "dumping symbol %d/%d as '%s'", index, dict->n_symbols, filename);
+		code = jbig2_image_write_pbm_file(dict->glyphs[index], filename);
 #endif
         if (code < 0)
-            return jbig2_error(ctx, JBIG2_SEVERITY_WARNING, segment->number, "failed to dump symbol %d/%d as '%s'", index, dict->n_symbols, filename);
+            (void)jbig2_error(ctx, JBIG2_SEVERITY_WARNING, segment->number, "failed to dump symbol %d/%d as '%s'", index, dict->n_symbols, filename);
     }
 }
 #endif /* DUMP_SYMDICT */

@@ -65,3 +65,9 @@ typedef unsigned __int64 uint64_t;
 # include <stdint.h>
 
 #endif /* _MSC_VER */
+
+#define JBIG2_DEBUG
+//#define JBIG2_DEBUG_DUMP
+//#define JBIG2_DEBUG_ARITH
+//#define DUMP_SYMDICT
+#define HAVE_LIBPNG 1
