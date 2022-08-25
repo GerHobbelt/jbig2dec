@@ -41,6 +41,12 @@
 #include "jbig2_segment.h"
 #include "jbig2_image_rw.h"
 
+#ifdef HAVE_MUPDF
+#include "mupdf/assert.h"
+#include "mupdf/fitz.h"
+#endif
+
+
 #define pixel_outside_field(x, y) \
     ((y) < -128 || (y) > 0 || (x) < -128 || ((y) < 0 && (x) > 127) || ((y) == 0 && (x) >= 0))
 #define refpixel_outside_field(x, y) \
@@ -481,7 +487,7 @@ jbig2_refinement_region(Jbig2Ctx *ctx, Jbig2Segment *segment, const byte *segmen
            reuse any intermediate result, so we simply take another
            reference to it and free the original to keep track of this. */
         params.GRREFERENCE = jbig2_image_reference(ctx, (Jbig2Image *) ref->result);
-        jbig2_image_release(ctx, (Jbig2Image *) ref->result);
+		VERIFY_AND_CONTINUE(jbig2_image_release(ctx, (Jbig2Image *) ref->result) == 1);
         ref->result = NULL;
         jbig2_error(ctx, JBIG2_SEVERITY_DEBUG, segment->number, "found reference bitmap in segment %d", ref->number);
     } else {
@@ -550,8 +556,8 @@ jbig2_refinement_region(Jbig2Ctx *ctx, Jbig2Segment *segment, const byte *segmen
         }
 
 cleanup:
-        jbig2_image_release(ctx, image);
-        jbig2_image_release(ctx, params.GRREFERENCE);
+		VERIFY_AND_CONTINUE(jbig2_image_release(ctx, image) == 1);
+		VERIFY_AND_CONTINUE(jbig2_image_release(ctx, params.GRREFERENCE) == 1);
         jbig2_free(ctx->allocator, as);
         jbig2_word_stream_buf_free(ctx, ws);
         jbig2_free(ctx->allocator, GR_stats);

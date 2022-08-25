@@ -39,6 +39,10 @@
 #include "jbig2_symbol_dict.h"
 #include "jbig2_text.h"
 
+#ifdef HAVE_MUPDF
+#include "mupdf/assert.h"
+#endif
+
 Jbig2Segment *
 jbig2_parse_segment_header(Jbig2Ctx *ctx, uint8_t *buf, size_t buf_size, size_t *p_header_size)
 {
@@ -155,7 +159,7 @@ jbig2_free_segment(Jbig2Ctx *ctx, Jbig2Segment *segment)
     case 4:                    /* intermediate text region */
     case 40:                   /* intermediate refinement region */
         if (segment->result != NULL)
-            jbig2_image_release(ctx, (Jbig2Image *) segment->result);
+			VERIFY_AND_CONTINUE(jbig2_image_release(ctx, (Jbig2Image *) segment->result) == 1);
         break;
     case 16:                   /* pattern dictionary */
         if (segment->result != NULL)

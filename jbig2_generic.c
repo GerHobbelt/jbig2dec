@@ -42,6 +42,11 @@
 #include "jbig2_page.h"
 #include "jbig2_segment.h"
 
+#ifdef HAVE_MUPDF
+#include "mupdf/assert.h"
+#endif
+
+
 /*
 This is an explanation of the unoptimized and optimized generic
 region decoder implementations below, wherein we try to explain
@@ -1513,7 +1518,7 @@ cleanup:
     jbig2_free(ctx->allocator, as);
     jbig2_word_stream_buf_free(ctx, ws);
     jbig2_free(ctx->allocator, GB_stats);
-    jbig2_image_release(ctx, image);
+    VERIFY_AND_CONTINUE(jbig2_image_release(ctx, image) == 1);
 
     return code;
 }

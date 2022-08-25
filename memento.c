@@ -90,7 +90,7 @@ int atexit(void (*)(void));
 #define MEMENTO_FREEFILL_UINT (((unsigned int)MEMENTO_FREEFILL_USHORT) | (((unsigned int)MEMENTO_FREEFILL_USHORT)<<16))
 #define MEMENTO_FREEFILL_PTR (void *)(((uintptr_t)MEMENTO_FREEFILL_UINT) | ((((uintptr_t)MEMENTO_FREEFILL_UINT)<<16)<<16))
 
-#ifdef MEMENTO
+#if defined(MEMENTO)
 
 #ifndef MEMENTO_CPP_EXTRAS_ONLY
 

@@ -87,6 +87,10 @@ jbig2_decode_text_region(Jbig2Ctx *ctx, Jbig2Segment *segment,
     Jbig2HuffmanTable *SBSYMCODES = NULL;
     int code = 0;
     int RI;
+	int IB_id = -1;
+	int IB_index = -1;
+	int IBO_id = -1;
+	int IBO_index = -1;
 
     SBNUMSYMS = 0;
     for (index = 0; index < n_dicts; index++) {
@@ -351,7 +355,9 @@ cleanup1:
             if (ID >= SBNUMSYMS) {
                 jbig2_error(ctx, JBIG2_SEVERITY_WARNING, segment->number, "ignoring out of range symbol ID (%d/%d)", ID, SBNUMSYMS);
                 IB = NULL;
-            } else {
+				IB_id = -1;
+				IB_index = -1;
+			} else {
                 /* (3c.v) / 6.4.11 - look up the symbol bitmap IB */
                 uint32_t id = ID;
 
@@ -363,10 +369,19 @@ cleanup1:
                 } else {
                     IB = jbig2_image_reference(ctx, dicts[index]->glyphs[id]);
 					ASSERT(IB);
+					if (IB != NULL)
+					{
+						IB_id = id;
+						IB_index = index;
+						ASSERT(index >= 0);
+						ASSERT(id >= 0);
+					}
 					if (IB->data == (void*)0xddddddddddddddddULL)
 					{
 						id++;
 						id--;
+						Jbig2Image* x = dicts[index]->glyphs[id];
+						IB = jbig2_image_reference(ctx, x);
 					}
 					ASSERT(IB->data != (void*)0xddddddddddddddddULL);
                 }
@@ -415,8 +430,17 @@ cleanup1:
                 }
 
                 if (code1 < 0 || code2 < 0 || code3 < 0 || code4 < 0 || code5 < 0 || code6 < 0) {
-					if (jbig2_image_release(ctx, IB))
+					if (jbig2_image_release(ctx, IB) && IB)
+					{
+						ASSERT(IB_id >= 0);
+						ASSERT(IB_index >= 0);
+						ASSERT(dicts[IB_index]->glyphs[IB_id] == IB || dicts[IB_index]->glyphs[IB_id] == NULL);
+						dicts[IB_index]->glyphs[IB_id] = NULL;
+
 						IB = NULL;
+						IB_id = -1;
+						IB_index = -1;
+					}
                     code = jbig2_error(ctx, JBIG2_SEVERITY_WARNING, segment->number, "failed to decode data");
                     goto cleanup2;
                 }
@@ -427,9 +451,15 @@ cleanup1:
 
                 /* 6.4.11 (6) */
                 if (IB) {
-                    IBO = IB;
+					IBO_id = IB_id;
+					IBO_index = IB_index;
+					IBO = IB;
+
                     IB = NULL;
-                    if (((int32_t) IBO->width) + RDW < 0 || ((int32_t) IBO->height) + RDH < 0) {
+					IB_id = -1;
+					IB_index = -1;
+
+					if (((int32_t) IBO->width) + RDW < 0 || ((int32_t) IBO->height) + RDH < 0) {
                         code = jbig2_error(ctx, JBIG2_SEVERITY_FATAL, segment->number, "reference image dimensions negative");
                         goto cleanup2;
                     }
@@ -453,10 +483,22 @@ cleanup1:
                         goto cleanup2;
                     }
 
-                    jbig2_image_release(ctx, IBO);
+					if (jbig2_image_release(ctx, IBO) && IBO)
+					{
+						ASSERT(IBO_id >= 0);
+						ASSERT(IBO_index >= 0);
+						ASSERT(dicts[IBO_index]->glyphs[IBO_id] == IBO);
+						dicts[IBO_index]->glyphs[IBO_id] = NULL;
+					}
                     IBO = NULL;
-                    IB = refimage;
-                    refimage = NULL;
+					IBO_id = -1;
+					IBO_index = -1;
+
+					IB = refimage;
+					IB_id = -1000 - (IBO->width + RDW);
+					IB_index = -1000 - (IBO->height + RDH);
+
+					refimage = NULL;
                 }
 
                 /* 6.4.11 (7) */
@@ -546,8 +588,12 @@ cleanup1:
 
             /* (3c.ix) */
 #ifdef JBIG2_DEBUG
-            jbig2_error(ctx, JBIG2_SEVERITY_DEBUG, segment->number,
-                        "composing glyph ID %d: %dx%d @ (%d,%d) symbol %d/%d", ID, IB->width, IB->height, x, y, NINSTANCES + 1, params->SBNUMINSTANCES);
+			if (IB)
+				jbig2_error(ctx, JBIG2_SEVERITY_DEBUG, segment->number,
+                    "composing glyph ID %d: %dx%d @ (%d,%d) symbol %d/%d", ID, IB->width, IB->height, x, y, NINSTANCES + 1, params->SBNUMINSTANCES);
+			else
+				jbig2_error(ctx, JBIG2_SEVERITY_DEBUG, segment->number,
+					"composing glyph ID %d: IB = NULL @ (%d,%d) symbol %d/%d", ID, x, y, NINSTANCES + 1, params->SBNUMINSTANCES);
 #endif
             code = jbig2_image_compose(ctx, image, IB, x, y, params->SBCOMBOP);
             if (code < 0) {
@@ -565,18 +611,38 @@ cleanup1:
             /* (3c.xi) */
             NINSTANCES++;
 
-            jbig2_image_release(ctx, IB);
+			if (jbig2_image_release(ctx, IB) && IB)
+			{
+				ASSERT(IB_id >= 0);
+				ASSERT(IB_index >= 0);
+				ASSERT(dicts[IB_index]->glyphs[IB_id] == IB || dicts[IB_index]->glyphs[IB_id] == NULL);
+				dicts[IB_index]->glyphs[IB_id] = NULL;
+			}
             IB = NULL;
-        }
+			IB_id = -1;
+			IB_index = -1;
+		}
         /* end strip */
     }
     /* 6.4.5 (4) */
 
 cleanup2:
-    jbig2_image_release(ctx, refimage);
-    jbig2_image_release(ctx, IBO);
-    jbig2_image_release(ctx, IB);
-    if (params->SBHUFF) {
+	VERIFY_AND_CONTINUE(jbig2_image_release(ctx, refimage) == 1);
+	if (jbig2_image_release(ctx, IBO) && IBO)
+	{
+		ASSERT(IBO_id >= 0);
+		ASSERT(IBO_index >= 0);
+		ASSERT(dicts[IBO_index]->glyphs[IBO_id] == IBO || dicts[IBO_index]->glyphs[IBO_id] == NULL);
+		dicts[IBO_index]->glyphs[IBO_id] = NULL;
+	}
+	if (jbig2_image_release(ctx, IB) && IB)
+	{
+		ASSERT(IB_id >= 0);
+		ASSERT(IB_index >= 0);
+		ASSERT(dicts[IB_index]->glyphs[IB_id] == IB || dicts[IB_index]->glyphs[IB_id] == NULL);
+		dicts[IB_index]->glyphs[IB_id] = NULL;
+	}
+	if (params->SBHUFF) {
         jbig2_release_huffman_table(ctx, SBSYMCODES);
     }
     jbig2_huffman_free(ctx, hs);
@@ -1038,7 +1104,7 @@ cleanup3:
 
 cleanup2:
     jbig2_free(ctx->allocator, GR_stats);
-    jbig2_image_release(ctx, image);
+	VERIFY_AND_CONTINUE(jbig2_image_release(ctx, image) == 1);
 
 cleanup1:
     if (params.SBHUFF) {

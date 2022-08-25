@@ -30,6 +30,11 @@
 #include "jbig2_image.h"
 #include "jbig2_image_rw.h"
 
+#ifdef HAVE_MUPDF
+#include "mupdf/assert.h"
+#endif
+
+
 /* take an image structure and write it to a file in pbm format */
 
 int
@@ -154,7 +159,7 @@ jbig2_image_read_pbm(Jbig2Ctx *ctx, FILE *in)
     (void)fread(image->data, 1, image->height * image->stride, in);
     if (feof(in)) {
         fprintf(stderr, "unexpected end of pbm file.\n");
-        jbig2_image_release(ctx, image);
+		VERIFY_AND_CONTINUE(jbig2_image_release(ctx, image) == 1);
         return NULL;
     }
     /* success */

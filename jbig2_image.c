@@ -37,6 +37,17 @@
 #include "mupdf/fitz/system.h"
 #include "mupdf/fitz/context.h"
 #include "mupdf/assert.h"
+
+static inline void fz_lock_jbig2(fz_context* ctx)
+{
+	//fz_lock(ctx, FZ_LOCK_JBIG2, __FILE__, __LINE__);
+}
+
+static inline void fz_unlock_jbig2(fz_context* ctx)
+{
+	//fz_unlock(ctx, FZ_LOCK_JBIG2);
+}
+
 #endif
 
 /* allocate a Jbig2Image structure and its associated bitmap */
@@ -86,6 +97,8 @@ jbig2_image_reference(Jbig2Ctx *ctx, Jbig2Image *image)
 {
 	if (image)
 	{
+		fz_lock_jbig2(fz_get_global_context());
+
 		image->refcount++;
 		if (image->refcount <= 0 || image->refcount > 100000)
 		{
@@ -95,6 +108,8 @@ jbig2_image_reference(Jbig2Ctx *ctx, Jbig2Image *image)
 			fprintf(stderr, "*!* corrupted refcount %d?\n", (int)image->refcount);
 #endif
 		}
+
+		fz_unlock_jbig2(fz_get_global_context());
 	}
     return image;
 }
@@ -105,7 +120,10 @@ jbig2_image_release(Jbig2Ctx *ctx, Jbig2Image *image)
 {
     if (image == NULL)
         return 1;
-    image->refcount--;
+
+	fz_lock_jbig2(fz_get_global_context());
+
+	image->refcount--;
 	if (image->refcount < 0 || image->refcount > 100000)
 	{
 #ifdef HAVE_MUPDF
@@ -114,12 +132,24 @@ jbig2_image_release(Jbig2Ctx *ctx, Jbig2Image *image)
 		fprintf(stderr, "*!* corrupted refcount %d?\n", (int)image->refcount);
 #endif
 	}
-	if (image->refcount == 0)
+
+	int rv = 0;
+	if (image->refcount <= 0)
 	{
-		jbig2_image_free(ctx, image);
-		return 1;
+		if (image->refcount == 0)
+		{
+			jbig2_image_free(ctx, image);
+			rv = 1;
+		}
+		else
+		{
+			rv = 2;
+		}
 	}
-	return 0;
+
+	fz_unlock_jbig2(fz_get_global_context());
+
+	return rv;
 }
 
 /* free a Jbig2Image structure and its associated memory */
@@ -173,7 +203,7 @@ jbig2_image_resize(Jbig2Ctx *ctx, Jbig2Image *image, uint32_t width, uint32_t he
         code = jbig2_image_compose(ctx, newimage, image, 0, 0, JBIG2_COMPOSE_REPLACE);
         if (code < 0) {
             jbig2_error(ctx, JBIG2_SEVERITY_WARNING, JBIG2_UNKNOWN_SEGMENT_NUMBER, "failed to compose image buffers when resizing");
-            jbig2_image_release(ctx, newimage);
+			VERIFY_AND_CONTINUE(jbig2_image_release(ctx, newimage) == 1);
             return NULL;
         }
 
@@ -410,7 +440,7 @@ jbig2_image_compose(Jbig2Ctx *ctx, Jbig2Image *dst, Jbig2Image *src, int x, int 
     h = src->height;
     shift = (x & 7);
 	ASSERT(src->data != (void *)0xddddddddddddddddULL);
-    ss = src->data - early;
+	ss = src->data - early;
 
     if (x < 0) {
         if (w < (uint32_t) -x)
@@ -455,7 +485,8 @@ jbig2_image_compose(Jbig2Ctx *ctx, Jbig2Image *dst, Jbig2Image *src, int x, int 
     }
 
     leftbyte = (uint32_t) x >> 3;
-    dd = dst->data + y * dst->stride + leftbyte;
+	ASSERT(dst->data != (void*)0xddddddddddddddddULL);
+	dd = dst->data + y * dst->stride + leftbyte;
     bytewidth = (((uint32_t) x + w - 1) >> 3) - leftbyte + 1;
     leftmask = 255>>(x&7);
     rightmask = (((x+w)&7) == 0) ? 255 : ~(255>>((x+w)&7));

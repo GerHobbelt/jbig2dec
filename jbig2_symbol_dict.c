@@ -46,6 +46,11 @@
 #include "jbig2_text.h"
 #include "jbig2_image_rw.h"
 
+#ifdef HAVE_MUPDF
+#include "mupdf/assert.h"
+#endif
+
+
 /* Table 13 */
 typedef struct {
     bool SDHUFF;
@@ -129,8 +134,11 @@ jbig2_sd_release(Jbig2Ctx *ctx, Jbig2SymbolDict *dict)
     if (dict == NULL)
         return;
     if (dict->glyphs != NULL)
-        for (i = 0; i < dict->n_symbols; i++)
-            jbig2_image_release(ctx, dict->glyphs[i]);
+		for (i = 0; i < dict->n_symbols; i++)
+		{
+			int rv = jbig2_image_release(ctx, dict->glyphs[i]);
+			//VERIFY_AND_CONTINUE(rv == 1);
+		}
     jbig2_free(ctx->allocator, dict->glyphs);
     jbig2_free(ctx->allocator, dict);
 }
@@ -738,7 +746,7 @@ jbig2_decode_symbol_dict(Jbig2Ctx *ctx,
                 SDNEWSYMS->glyphs[j] = glyph;
                 glyph = NULL;
             }
-            jbig2_image_release(ctx, image);
+			VERIFY_AND_CONTINUE(jbig2_image_release(ctx, image) == 1);
             image = NULL;
         }
 
@@ -814,8 +822,8 @@ jbig2_decode_symbol_dict(Jbig2Ctx *ctx,
     }
 
 cleanup:
-    jbig2_image_release(ctx, glyph);
-    jbig2_image_release(ctx, image);
+	VERIFY_AND_CONTINUE(jbig2_image_release(ctx, glyph) == 1);
+	VERIFY_AND_CONTINUE(jbig2_image_release(ctx, image) == 1);
     if (refagg_dicts != NULL) {
         if (refagg_dicts[0] != NULL)
             jbig2_sd_release(ctx, refagg_dicts[0]);

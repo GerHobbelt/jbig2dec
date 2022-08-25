@@ -510,7 +510,14 @@ jbig2_ctx_free(Jbig2Ctx *ctx)
     if (ctx->pages != NULL) {
         for (i = 0; i <= ctx->current_page; i++)
             if (ctx->pages[i].image != NULL)
-                jbig2_image_release(ctx, ctx->pages[i].image);
+				if (jbig2_image_release(ctx, ctx->pages[i].image) != 1)
+				{
+#ifdef HAVE_MUPDF
+					fz_error(NULL, "*!* corrupted refcount %d? (jbig2_ctx_free)\n", (int)ctx->pages[i].image->refcount);
+#else
+					fprintf(stderr, "*!* corrupted refcount %d? (jbig2_ctx_free)\n", (int)ctx->pages[i].image->refcount);
+#endif
+				}
         jbig2_free(ca, ctx->pages);
     }
 
