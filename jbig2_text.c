@@ -489,14 +489,15 @@ cleanup1:
 						ASSERT(IBO_index >= 0);
 						ASSERT(dicts[IBO_index]->glyphs[IBO_id] == IBO);
 						dicts[IBO_index]->glyphs[IBO_id] = NULL;
+
+						IBO = NULL;
+						IBO_id = -1;
+						IBO_index = -1;
 					}
-                    IBO = NULL;
-					IBO_id = -1;
-					IBO_index = -1;
 
 					IB = refimage;
-					IB_id = -1000 - (IBO->width + RDW);
-					IB_index = -1000 - (IBO->height + RDH);
+					IB_id = -1000 - (IBO ? IBO->width + RDW : 0);
+					IB_index = -1000 - (IBO ? IBO->height + RDH : 0);
 
 					refimage = NULL;
                 }
