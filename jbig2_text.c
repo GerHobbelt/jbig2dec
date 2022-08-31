@@ -637,17 +637,29 @@ cleanup2:
 	VERIFY_AND_CONTINUE(jbig2_image_release(ctx, refimage) == 1);
 	if (jbig2_image_release(ctx, IBO) && IBO)
 	{
-		ASSERT(IBO_id >= 0);
-		ASSERT(IBO_index >= 0);
-		ASSERT(dicts[IBO_index]->glyphs[IBO_id] == IBO || dicts[IBO_index]->glyphs[IBO_id] == NULL);
-		dicts[IBO_index]->glyphs[IBO_id] = NULL;
+		if (IBO_id >= 0 && IBO_index >= 0)
+		{
+			ASSERT(dicts[IBO_index]->glyphs[IBO_id] == IBO || dicts[IBO_index]->glyphs[IBO_id] == NULL);
+			dicts[IBO_index]->glyphs[IBO_id] = NULL;
+		}
+		else
+		{
+			ASSERT_AND_CONTINUE(IBO_id <= -1000);
+			ASSERT_AND_CONTINUE(IBO_index <= -1000);
+		}
 	}
 	if (jbig2_image_release(ctx, IB) && IB)
 	{
-		ASSERT(IB_id >= 0);
-		ASSERT(IB_index >= 0);
-		ASSERT(dicts[IB_index]->glyphs[IB_id] == IB || dicts[IB_index]->glyphs[IB_id] == NULL);
-		dicts[IB_index]->glyphs[IB_id] = NULL;
+		if (IB_id >= 0 && IB_index >= 0)
+		{
+			ASSERT(dicts[IB_index]->glyphs[IB_id] == IB || dicts[IB_index]->glyphs[IB_id] == NULL);
+			dicts[IB_index]->glyphs[IB_id] = NULL;
+		}
+		else
+		{
+			ASSERT_AND_CONTINUE(IB_id <= -1000);
+			ASSERT_AND_CONTINUE(IB_index <= -1000);
+		}
 	}
 	if (params->SBHUFF) {
         jbig2_release_huffman_table(ctx, SBSYMCODES);
