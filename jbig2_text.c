@@ -614,10 +614,16 @@ cleanup1:
 
 			if (jbig2_image_release(ctx, IB) && IB)
 			{
-				ASSERT(IB_id >= 0);
-				ASSERT(IB_index >= 0);
-				ASSERT(dicts[IB_index]->glyphs[IB_id] == IB || dicts[IB_index]->glyphs[IB_id] == NULL);
-				dicts[IB_index]->glyphs[IB_id] = NULL;
+				if (IB_id >= 0 && IB_index >= 0)
+				{
+					ASSERT(dicts[IB_index]->glyphs[IB_id] == IB || dicts[IB_index]->glyphs[IB_id] == NULL);
+					dicts[IB_index]->glyphs[IB_id] = NULL;
+				}
+				else
+				{
+					ASSERT_AND_CONTINUE(IB_id <= -1000);
+					ASSERT_AND_CONTINUE(IB_index <= -1000);
+				}
 			}
             IB = NULL;
 			IB_id = -1;
