@@ -376,14 +376,6 @@ cleanup1:
                         ASSERT(index >= 0);
                         ASSERT(id >= 0);
                     }
-                    if (IB->data == (void*)0xddddddddddddddddULL)
-                    {
-                        ASSERT_AND_CONTINUE(!"Should never get here!");
-                        id++;
-                        id--;
-                        Jbig2Image* x = dicts[index]->glyphs[id];
-                        IB = jbig2_image_reference(ctx, x);
-                    }
                     ASSERT(IB->data != (void*)0xddddddddddddddddULL);
                 }
             }
@@ -494,8 +486,8 @@ cleanup1:
 
 
                     IB = refimage;
-                    IB_id = -1000 - (IBO ? IBO->width + RDW : 0);
-                    IB_index = -1000 - (IBO ? IBO->height + RDH : 0);
+                    IB_id = -1000;
+                    IB_index = -1000;
 
                     IBO = NULL;
                     IBO_id = -1;
