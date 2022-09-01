@@ -365,7 +365,9 @@ jbig2_arith_decode(Jbig2Ctx *ctx, Jbig2ArithState *as, Jbig2ArithCx *pcx)
     }
 }
 
-#ifdef TEST
+#if defined(TEST) || defined(BUILD_MONOLITHIC)
+
+#include "monolithic_examples.h"
 
 static const byte test_stream[] = {
     0x84, 0xC7, 0x3B, 0xFC, 0xE1, 0xA1, 0x43, 0x04, 0x02, 0x20, 0x00, 0x00,
@@ -412,6 +414,10 @@ test_get_word(Jbig2Ctx *ctx, Jbig2WordStream *self, size_t offset, uint32_t *wor
     *word = val;
     return ret;
 }
+
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr)      jbig2dec_arith_test_main(cnt, arr)
+#endif
 
 int
 main(int argc, const char** argv)

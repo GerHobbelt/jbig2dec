@@ -705,8 +705,11 @@ jbig2_find_table(Jbig2Ctx *ctx, Jbig2Segment *segment, int index)
     return NULL;
 }
 
-#ifdef TEST
+#if defined(TEST) || defined(BUILD_MONOLITHIC)
+
 #include <stdio.h>
+
+#include "monolithic_examples.h"
 
 /* cc -g -o jbig2_huffman.test1 -DTEST jbig2_huffman.c .libs/libjbig2dec.a */
 
@@ -817,7 +820,7 @@ cleanup:
 /* a decoding test of each line from each standard table */
 
 /* test code for Table B.1 - Standard Huffman table A */
-const int32_t test_output_A[] = {
+static const int32_t test_output_A[] = {
     /* line 0, PREFLEN=1, RANGELEN=4, VAL=0..15, 0+VAL */
     0,      /* 0 0000 */
     1,      /* 0 0001 */
@@ -837,7 +840,7 @@ const int32_t test_output_A[] = {
     65808,  /* 111 00000000 00000000 00000000 00000000 */
     65809,  /* 111 00000000 00000000 00000000 00000001 */
 };
-const byte test_input_A[] = {
+static const byte test_input_A[] = {
     /* 0000 0000 0101 1100 1111 1000 0000 0010 */
        0x00,     0x5c,     0xf8,     0x02,
     /* 0000 0001 1011 1111 1010 1111 1111 1100 */
@@ -855,7 +858,7 @@ const byte test_input_A[] = {
 };
 
 /* test code for Table B.2 - Standard Huffman table B */
-const int32_t test_output_B[] = {
+static const int32_t test_output_B[] = {
     /* line 0, PREFLEN=1, RANGELEN=0, VAL=0, 0 */
     0,      /* 0 */
     /* line 1, PREFLEN=2, RANGELEN=0, VAL=1, 10 */
@@ -878,7 +881,7 @@ const int32_t test_output_B[] = {
     /* line 6, PREFLEN=6, VAL=OOB, 111111 */
     /*OOB*/ /* 111111 */
 };
-const byte test_input_B[] = {
+static const byte test_input_B[] = {
     /* 0101 1011 1000 0111 0001 1110 1101 1101 */
        0x5b,     0x87,     0x1e,     0xdd,
     /* 1111 1100 0000 0111 1000 0001 1111 0111 */
@@ -892,7 +895,7 @@ const byte test_input_B[] = {
 };
 
 /* test code for Table B.3 - Standard Huffman table C */
-const int32_t test_output_C[] = {
+static const int32_t test_output_C[] = {
     /* line 0, PREFLEN=8, RANGELEN=8, VAL=-256..-1, 11111110+(VAL+256) */
     -256,   /* 11111110 00000000 */
     -255,   /* 11111110 00000001 */
@@ -923,7 +926,7 @@ const int32_t test_output_C[] = {
     /* line 8, PREFLEN=6, VAL=OOB, 111110 */
     /*OOB*/ /* 111110 */
 };
-const byte test_input_C[] = {
+static const byte test_input_C[] = {
     /* 1111 1110 0000 0000 1111 1110 0000 0001 */
        0xfe,     0x00,     0xfe,     0x01,
     /* 1111 1110 1111 1110 1111 1110 1111 1111 */
@@ -947,7 +950,7 @@ const byte test_input_C[] = {
 };
 
 /* test code for Table B.4 - Standard Huffman table D */
-const int32_t test_output_D[] = {
+static const int32_t test_output_D[] = {
     /* line 0, PREFLEN=1, RANGELEN=0, VAL=1, 0 */
     1,      /* 0 */
     /* line 1, PREFLEN=2, RANGELEN=0, VAL=2, 10 */
@@ -968,7 +971,7 @@ const int32_t test_output_D[] = {
     76,     /* 11111 00000000 00000000 00000000 00000000 */
     77,     /* 11111 00000000 00000000 00000000 00000001 */
 };
-const byte test_input_D[] = {
+static const byte test_input_D[] = {
     /* 0101 1011 1000 0111 0001 1110 1101 1101 */
        0x5b,     0x87,     0x1e,     0xdd,
     /* 1111 1100 0000 0111 1000 0001 1111 0111 */
@@ -982,7 +985,7 @@ const byte test_input_D[] = {
 };
 
 /* test code for Table B.5 - Standard Huffman table E */
-const int32_t test_output_E[] = {
+static const int32_t test_output_E[] = {
     /* line 0, PREFLEN=7, RANGELEN=8, VAL=-255..0, 1111110+(VAL+255) */
     -255,   /* 1111110 00000000 */
     -254,   /* 1111110 00000001 */
@@ -1011,7 +1014,7 @@ const int32_t test_output_E[] = {
     76,     /* 111110 00000000 00000000 00000000 00000000 */
     77,     /* 111110 00000000 00000000 00000000 00000001 */
 };
-const byte test_input_E[] = {
+static const byte test_input_E[] = {
     /* 1111 1100 0000 0001 1111 1000 0000 0111 */
        0xfc,     0x01,     0xf8,     0x07,
     /* 1111 0111 1111 0111 1110 1111 1111 0101 */
@@ -1035,7 +1038,7 @@ const byte test_input_E[] = {
 };
 
 /* test code for Table B.6 - Standard Huffman table F */
-const int32_t test_output_F[] = {
+static const int32_t test_output_F[] = {
     /* line 0, PREFLEN=5, RANGELEN=10, VAL=-2048..-1025, 11100+(VAL+2048) */
     -2048,  /* 11100 00000000 00 */
     -2047,  /* 11100 00000000 01 */
@@ -1103,7 +1106,7 @@ const int32_t test_output_F[] = {
     2048,   /* 111111 00000000 00000000 00000000 00000000 */
     2049,   /* 111111 00000000 00000000 00000000 00000001 */
 };
-const byte test_input_F[] = {
+static const byte test_input_F[] = {
     /* 1110 0000 0000 0001 1100 0000 0000 0111 */
        0xe0,     0x01,     0xc0,     0x07,
     /* 1001 1111 1111 0111 0011 1111 1111 1000 */
@@ -1151,7 +1154,7 @@ const byte test_input_F[] = {
 };
 
 /* test code for Table B.7 - Standard Huffman table G */
-const int32_t test_output_G[] = {
+static const int32_t test_output_G[] = {
     /* line 0, PREFLEN=4, RANGELEN=9, VAL=-1024..-513, 1000+(VAL+1024) */
     -1024,  /* 1000 00000000 0 */
     -1023,  /* 1000 00000000 1 */
@@ -1224,7 +1227,7 @@ const int32_t test_output_G[] = {
     2048,   /* 11111 00000000 00000000 00000000 00000000 */
     2049,   /* 11111 00000000 00000000 00000000 00000001 */
 };
-const byte test_input_G[] = {
+static const byte test_input_G[] = {
     /* 1000 0000 0000 0100 0000 0000 0110 0011 */
        0x80,     0x04,     0x00,     0x63,
     /* 1111 1101 0001 1111 1111 0000 0000 0000 */
@@ -1274,7 +1277,7 @@ const byte test_input_G[] = {
 };
 
 /* test code for Table B.8 - Standard Huffman table H */
-const int32_t test_output_H[] = {
+static const int32_t test_output_H[] = {
     /* line 0, PREFLEN=8, RANGELEN=3, VAL=-15..-8, 11111100+(VAL+15) */
     -15,    /* 11111100 000 */
     -14,    /* 11111100 001 */
@@ -1351,7 +1354,7 @@ const int32_t test_output_H[] = {
     /* line 20, PREFLEN=2, VAL=OOB, 01 */
     /*OOB*/ /* 01 */
 };
-const byte test_input_H[] = {
+static const byte test_input_H[] = {
     /* 1111 1100  0001 1111 1000 0111 1111 0011 */
        0xfc,     0x1f,     0x87,     0xf3,
     /* 0111 1110  0111 1111 1110 0011 1111 1001 */
@@ -1397,7 +1400,7 @@ const byte test_input_H[] = {
 };
 
 /* test code for Table B.9 - Standard Huffman table I */
-const int32_t test_output_I[] = {
+static const int32_t test_output_I[] = {
     /* line 0, PREFLEN=8, RANGELEN=4, VAL=-31..-16, 11111100+(VAL+31) */
     -31,    /* 11111100 0000 */
     -30,    /* 11111100 0001 */
@@ -1488,7 +1491,7 @@ const int32_t test_output_I[] = {
     /* line 21, PREFLEN=2, VAL=OOB, 00 */
     /*OOB*/ /* 00 */
 };
-const byte test_input_I[] = {
+static const byte test_input_I[] = {
     /* 1111 1100 0000 1111 1100 0001 1111 1100 */
        0xfc,     0x0f,     0xc1,     0xfc,
     /* 1110 1111 1100 1111 1111 1110 0001 1111 */
@@ -1544,7 +1547,7 @@ const byte test_input_I[] = {
 };
 
 /* test code for Table B.10 - Standard Huffman table J */
-const int32_t test_output_J[] = {
+static const int32_t test_output_J[] = {
     /* line 0, PREFLEN=7, RANGELEN=4, VAL=-21..-6, 1111010+(VAL+21) */
     -21,    /* 1111010 0000 */
     -20,    /* 1111010 0001 */
@@ -1623,7 +1626,7 @@ const int32_t test_output_J[] = {
     /* line 8, PREFLEN=2, VAL=OOB, 10 */
     /*OOB*/ /* 10 */
 };
-const byte test_input_J[] = {
+static const byte test_input_J[] = {
     /* 1111 0100 0001 1110 1000 0111 1101 0111 */
        0xf4,     0x1e,     0x87,     0xd7,
     /* 0111 1010 1111 1111 1100 1111 0111 1000 */
@@ -1673,7 +1676,7 @@ const byte test_input_J[] = {
 };
 
 /* test code for Table B.11 - Standard Huffman table K */
-const int32_t test_output_K[] = {
+static const int32_t test_output_K[] = {
     /* line 0, PREFLEN=1, RANGELEN=0, VAL=1, 0 */
     1,      /* 0 */
     /* line 1, PREFLEN=2, RANGELEN=1, VAL=2..3, 10+(VAL-2) */
@@ -1726,7 +1729,7 @@ const int32_t test_output_K[] = {
     141,    /* 1111111 00000000 00000000 00000000 00000000 */
     142,    /* 1111111 00000000 00000000 00000000 00000001 */
 };
-const byte test_input_K[] = {
+static const byte test_input_K[] = {
     /* 0100 1011 1001 1010 1101 1111 0001 1100 */
        0x4b,     0x9a,     0xdf,     0x1c,
     /* 1111 0100 1110 1011 1101 1011 1011 1111 */
@@ -1756,7 +1759,7 @@ const byte test_input_K[] = {
 };
 
 /* test code for Table B.12 - Standard Huffman table L */
-const int32_t test_output_L[] = {
+static const int32_t test_output_L[] = {
     /* line 0, PREFLEN=1, RANGELEN=0, VAL=1, 0 */
     1,      /* 0 */
     /* line 1, PREFLEN=2, RANGELEN=0, VAL=2, 10 */
@@ -1801,7 +1804,7 @@ const int32_t test_output_L[] = {
     73,     /* 11111111 00000000 00000000 00000000 00000000 */
     74,     /* 11111111 00000000 00000000 00000000 00000001 */
 };
-const byte test_input_L[] = {
+static const byte test_input_L[] = {
     /* 0101 1001 1011 1100 1110 1011 1011 1111 */
        0x59,     0xbc,     0xeb,     0xbf,
     /* 0001 1110 0111 1101 0111 1011 0111 1011 */
@@ -1825,7 +1828,7 @@ const byte test_input_L[] = {
 };
 
 /* test code for Table B.13 - Standard Huffman table M */
-const int32_t test_output_M[] = {
+static const int32_t test_output_M[] = {
     /* line 0, PREFLEN=1, RANGELEN=0, VAL=1, 0 */
     1,      /* 0 */
     /* line 1, PREFLEN=3, RANGELEN=0, VAL=2, 100 */
@@ -1874,7 +1877,7 @@ const int32_t test_output_M[] = {
     141,    /* 1111111 00000000 00000000 00000000 00000000 */
     142,    /* 1111111 00000000 00000000 00000000 00000001 */
 };
-const byte test_input_M[] = {
+static const byte test_input_M[] = {
     /* 0100 1100 1110 0110 1011 0111 0100 0101 */
        0x4c,     0xe6,     0xb7,     0x45,
     /* 0011 0111 0101 1111 1101 0011 1010 1111 */
@@ -1900,7 +1903,7 @@ const byte test_input_M[] = {
 };
 
 /* test code for Table B.14 - Standard Huffman table N */
-const int32_t test_output_N[] = {
+static const int32_t test_output_N[] = {
     /* line 0, PREFLEN=3, RANGELEN=0, VAL=-2, 100 */
     -2,     /* 100 */
     /* line 1, PREFLEN=3, RANGELEN=0, VAL=-1, 101 */
@@ -1912,13 +1915,13 @@ const int32_t test_output_N[] = {
     /* line 4, PREFLEN=3, RANGELEN=0, VAL=2, 111 */
     2,      /* 111 */
 };
-const byte test_input_N[] = {
+static const byte test_input_N[] = {
     /* 1001 0101 1011 1 */
        0x95,     0xb8,
 };
 
 /* test code for Table B.15 - Standard Huffman table O */
-const int32_t test_output_O[] = {
+static const int32_t test_output_O[] = {
     /* line 0, PREFLEN=7, RANGELEN=4, VAL=-24..-9, 1111100+(VAL+24) */
     -24,    /* 1111100 0000 */
     -23,    /* 1111100 0001 */
@@ -1962,7 +1965,7 @@ const int32_t test_output_O[] = {
     25,     /* 1111111 00000000 00000000 00000000 00000000 */
     26,     /* 1111111 00000000 00000000 00000000 00000001 */
 };
-const byte test_input_O[] = {
+static const byte test_input_O[] = {
     /* 1111 1000 0001 1111 0000 0111 1110 0111 */
        0xf8,     0x1f,     0x07,     0xe7,
     /* 0111 1100 1111 1111 0000 1111 0001 1111 */
@@ -2005,7 +2008,7 @@ typedef struct test_huffmancodes {
     test_output_##x, countof(test_output_##x), \
 }
 
-test_huffmancodes_t tests[] = {
+static test_huffmancodes_t tests[] = {
     DEF_TEST_HUFFMANCODES(A),
     DEF_TEST_HUFFMANCODES(B),
     DEF_TEST_HUFFMANCODES(C),
@@ -2139,6 +2142,10 @@ static int test2()
 
     return success;
 }
+
+#if defined(BUILD_MONOLITHIC)
+#define main(cnt, arr)      jbig2dec_huffman_test_main(cnt, arr)
+#endif
 
 int
 main(int argc, const char** argv)

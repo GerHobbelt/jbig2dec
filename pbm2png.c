@@ -35,11 +35,13 @@
 #include "jbig2_image.h"
 #include "jbig2_image_rw.h"
 
-#ifdef HAVE_LIBPNG
+#include "monolithic_examples.h"
 
 #if defined(BUILD_MONOLITHIC)
 #define main(cnt, arr)      jbig2dec_pbm2png_main(cnt, arr)
 #endif
+
+#ifdef HAVE_LIBPNG
 
 int main(int argc, const char** argv)
 {
@@ -69,6 +71,14 @@ int main(int argc, const char** argv)
     }
 
     return (code);
+}
+
+#else
+
+int main(int argc, const char** argv)
+{
+	fprintf(stderr, "%s: this tool is not supported in this build (no PNG library built-in).\n", argv[0]);
+	return 1;
 }
 
 #endif

@@ -46,6 +46,8 @@
 #include "jbig2_image.h"
 #include "jbig2_image_rw.h"
 
+#include "monolithic_examples.h"
+
 #undef verbose
 
 typedef enum {
