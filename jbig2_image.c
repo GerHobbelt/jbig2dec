@@ -158,7 +158,7 @@ jbig2_image_free(Jbig2Ctx *ctx, Jbig2Image *image)
 {
     if (image != NULL) {
         jbig2_free(ctx->allocator, image->data);
-		// making sure we'll observe these crap-ups even when not running in MSVC + CRTDBG DEBUG mode:
+        // making sure we'll observe these crap-ups even when not running in MSVC + CRTDBG DEBUG mode:
         image->data = (void*)0xddddddddddddddddULL;
         image->refcount = INT_MIN / 2;
         jbig2_free(ctx->allocator, image);

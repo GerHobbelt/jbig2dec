@@ -262,7 +262,7 @@ jbig2_decode_symbol_dict(Jbig2Ctx *ctx,
     Jbig2Image *image = NULL;
     Jbig2Image *glyph = NULL;
     uint32_t emptyruns = 0;
-	Jbig2Image* GRREFERENCE_4_cleanup = NULL;
+    Jbig2Image* GRREFERENCE_4_cleanup = NULL;
 
     memset(&tparams, 0, sizeof(tparams));
 
@@ -833,12 +833,12 @@ jbig2_decode_symbol_dict(Jbig2Ctx *ctx,
 cleanup:
     VERIFY_AND_CONTINUE_EQ(jbig2_image_release(ctx, glyph), 1);
     VERIFY_AND_CONTINUE_EQ(jbig2_image_release(ctx, image), 1);
-	{
-		int rv = jbig2_image_release(ctx, GRREFERENCE_4_cleanup);
-		ASSERT_AND_CONTINUE(rv == 1 || rv == 0);
-		GRREFERENCE_4_cleanup = NULL;
-	}
-	if (refagg_dicts != NULL) {
+    {
+        int rv = jbig2_image_release(ctx, GRREFERENCE_4_cleanup);
+        ASSERT_AND_CONTINUE(rv == 1 || rv == 0);
+        GRREFERENCE_4_cleanup = NULL;
+    }
+    if (refagg_dicts != NULL) {
         if (refagg_dicts[0] != NULL)
             jbig2_sd_release(ctx, refagg_dicts[0]);
         /* skip releasing refagg_dicts[1] as that is the same as SDNEWSYMS */
