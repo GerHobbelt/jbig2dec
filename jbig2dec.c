@@ -615,7 +615,7 @@ int main(int argc, const char** argv)
 
         if ((argc - filearg) == 1) {
             /* only one argument--open as a jbig2 file */
-			const char *fn = argv[filearg];
+            const char *fn = argv[filearg];
 
             f = fopen(fn, "rb");
             if (f == NULL) {
@@ -624,8 +624,8 @@ int main(int argc, const char** argv)
             }
         } else if ((argc - filearg) == 2) {
             /* two arguments open as separate global and page streams */
-			const char *fn = argv[filearg];
-			const char *fn_page = argv[filearg + 1];
+            const char *fn = argv[filearg];
+            const char *fn_page = argv[filearg + 1];
 
             f = fopen(fn, "rb");
             if (f == NULL) {

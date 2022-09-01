@@ -34,6 +34,10 @@
 #include "jbig2_page.h"
 #include "jbig2_segment.h"
 
+#ifdef HAVE_MUPDF
+#include "mupdf/assert.h"
+#endif
+
 /* dump the page struct info */
 static void
 dump_page_info(Jbig2Ctx *ctx, Jbig2Segment *segment, Jbig2Page *page)
@@ -354,10 +358,14 @@ jbig2_release_page(Jbig2Ctx *ctx, Jbig2Image *image)
         return;
 
     /* find the matching page struct and mark it released */
-    for (index = 0; index < ctx->max_page_index; index++) {
-        if (ctx->pages[index].image == image) {
-			if (jbig2_image_release(ctx, image))
-				ctx->pages[index].image = NULL;
+    for (index = 0; index < ctx->max_page_index; index++)
+    {
+        if (ctx->pages[index].image == image)
+        {
+            int rv = jbig2_image_release(ctx, image);
+            ASSERT_AND_CONTINUE(rv == 1 || rv == 0);
+            ctx->pages[index].image = NULL;
+
             ctx->pages[index].state = JBIG2_PAGE_RELEASED;
             jbig2_error(ctx, JBIG2_SEVERITY_DEBUG, JBIG2_UNKNOWN_SEGMENT_NUMBER, "page %d released by the client", ctx->pages[index].number);
             return;

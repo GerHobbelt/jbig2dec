@@ -85,13 +85,13 @@ jbig2_dump_symbol_dict(Jbig2Ctx *ctx, Jbig2Segment *segment)
     jbig2_error(ctx, JBIG2_SEVERITY_INFO, segment->number, "dumping symbol dictionary as %d individual png files", dict->n_symbols);
     for (index = 0; index < dict->n_symbols; index++) {
 #ifdef HAVE_LIBPNG
-		snprintf(filename, sizeof(filename), "symbol_%02d-%04d.png", segment->number, index);
-		jbig2_error(ctx, JBIG2_SEVERITY_DEBUG, segment->number, "dumping symbol %d/%d as '%s'", index, dict->n_symbols, filename);
-		code = jbig2_image_write_png_file(dict->glyphs[index], filename);
+        snprintf(filename, sizeof(filename), "symbol_%02d-%04d.png", segment->number, index);
+        jbig2_error(ctx, JBIG2_SEVERITY_DEBUG, segment->number, "dumping symbol %d/%d as '%s'", index, dict->n_symbols, filename);
+        code = jbig2_image_write_png_file(dict->glyphs[index], filename);
 #else
-		snprintf(filename, sizeof(filename), "symbol_%02d-%04d.pbm", segment->number, index);
-		jbig2_error(ctx, JBIG2_SEVERITY_DEBUG, segment->number, "dumping symbol %d/%d as '%s'", index, dict->n_symbols, filename);
-		code = jbig2_image_write_pbm_file(dict->glyphs[index], filename);
+        snprintf(filename, sizeof(filename), "symbol_%02d-%04d.pbm", segment->number, index);
+        jbig2_error(ctx, JBIG2_SEVERITY_DEBUG, segment->number, "dumping symbol %d/%d as '%s'", index, dict->n_symbols, filename);
+        code = jbig2_image_write_pbm_file(dict->glyphs[index], filename);
 #endif
         if (code < 0)
             (void)jbig2_error(ctx, JBIG2_SEVERITY_WARNING, segment->number, "failed to dump symbol %d/%d as '%s'", index, dict->n_symbols, filename);
@@ -134,11 +134,11 @@ jbig2_sd_release(Jbig2Ctx *ctx, Jbig2SymbolDict *dict)
     if (dict == NULL)
         return;
     if (dict->glyphs != NULL)
-		for (i = 0; i < dict->n_symbols; i++)
-		{
-			int rv = jbig2_image_release(ctx, dict->glyphs[i]);
-			//VERIFY_AND_CONTINUE(rv == 1);
-		}
+        for (i = 0; i < dict->n_symbols; i++)
+        {
+            int rv = jbig2_image_release(ctx, dict->glyphs[i]);
+            VERIFY_AND_CONTINUE(rv == 1 || rv == 0);
+        }
     jbig2_free(ctx->allocator, dict->glyphs);
     jbig2_free(ctx->allocator, dict);
 }
@@ -262,6 +262,7 @@ jbig2_decode_symbol_dict(Jbig2Ctx *ctx,
     Jbig2Image *image = NULL;
     Jbig2Image *glyph = NULL;
     uint32_t emptyruns = 0;
+	Jbig2Image* GRREFERENCE_4_cleanup = NULL;
 
     memset(&tparams, 0, sizeof(tparams));
 
@@ -466,7 +467,7 @@ jbig2_decode_symbol_dict(Jbig2Ctx *ctx,
 #endif
                 /* 6.5.8 */
                 if (!params->SDREFAGG) {
-                    Jbig2GenericRegionParams region_params;
+                    Jbig2GenericRegionParams region_params = { 0 };
                     int sdat_bytes;
 
                     /* Table 16 */
@@ -537,7 +538,7 @@ jbig2_decode_symbol_dict(Jbig2Ctx *ctx,
                     } else {
                         /* 6.5.8.2.2 */
                         /* bool SBHUFF = params->SDHUFF; */
-                        Jbig2RefinementRegionParams rparams;
+                        Jbig2RefinementRegionParams rparams = { 0 };
                         uint32_t ID;
                         int32_t RDX, RDY;
                         int BMSIZE = 0;
@@ -586,7 +587,8 @@ jbig2_decode_symbol_dict(Jbig2Ctx *ctx,
 
                         /* Table 18 */
                         rparams.GRTEMPLATE = params->SDRTEMPLATE;
-                        rparams.GRREFERENCE = (ID < ninsyms) ? params->SDINSYMS->glyphs[ID] : SDNEWSYMS->glyphs[ID - ninsyms];
+                        rparams.GRREFERENCE = jbig2_image_reference(ctx, (ID < ninsyms) ? params->SDINSYMS->glyphs[ID] : SDNEWSYMS->glyphs[ID - ninsyms]);
+                        GRREFERENCE_4_cleanup = rparams.GRREFERENCE;
                         /* SumatraPDF: fail on missing glyphs */
                         if (rparams.GRREFERENCE == NULL) {
                             code = jbig2_error(ctx, JBIG2_SEVERITY_FATAL, segment->number, "missing glyph %d/%d", ID, ninsyms);
@@ -615,6 +617,13 @@ jbig2_decode_symbol_dict(Jbig2Ctx *ctx,
                                 jbig2_error(ctx, JBIG2_SEVERITY_WARNING, segment->number, "failed to advance after huffman decoding in refinement region");
                                 goto cleanup;
                             }
+                        }
+
+                        {
+                            int rv = jbig2_image_release(ctx, rparams.GRREFERENCE);
+                            ASSERT_AND_CONTINUE(rv == 1 || rv == 0);
+                            rparams.GRREFERENCE = NULL;
+                            GRREFERENCE_4_cleanup = NULL;
                         }
                     }
                 }
@@ -703,7 +712,7 @@ jbig2_decode_symbol_dict(Jbig2Ctx *ctx,
                     src += stride;
                 }
             } else {
-                Jbig2GenericRegionParams rparams;
+                Jbig2GenericRegionParams rparams = { 0 };
 
                 /* SumatraPDF: prevent read access violation */
                 if (size < jbig2_huffman_offset(hs) || size < BMSIZE || size - jbig2_huffman_offset(hs) < BMSIZE) {
@@ -746,7 +755,7 @@ jbig2_decode_symbol_dict(Jbig2Ctx *ctx,
                 SDNEWSYMS->glyphs[j] = glyph;
                 glyph = NULL;
             }
-			VERIFY_AND_CONTINUE(jbig2_image_release(ctx, image) == 1);
+            VERIFY_AND_CONTINUE_EQ(jbig2_image_release(ctx, image), 1);
             image = NULL;
         }
 
@@ -822,9 +831,14 @@ jbig2_decode_symbol_dict(Jbig2Ctx *ctx,
     }
 
 cleanup:
-	VERIFY_AND_CONTINUE(jbig2_image_release(ctx, glyph) == 1);
-	VERIFY_AND_CONTINUE(jbig2_image_release(ctx, image) == 1);
-    if (refagg_dicts != NULL) {
+    VERIFY_AND_CONTINUE_EQ(jbig2_image_release(ctx, glyph), 1);
+    VERIFY_AND_CONTINUE_EQ(jbig2_image_release(ctx, image), 1);
+	{
+		int rv = jbig2_image_release(ctx, GRREFERENCE_4_cleanup);
+		ASSERT_AND_CONTINUE(rv == 1 || rv == 0);
+		GRREFERENCE_4_cleanup = NULL;
+	}
+	if (refagg_dicts != NULL) {
         if (refagg_dicts[0] != NULL)
             jbig2_sd_release(ctx, refagg_dicts[0]);
         /* skip releasing refagg_dicts[1] as that is the same as SDNEWSYMS */

@@ -37,8 +37,8 @@ typedef enum {
 } Jbig2Severity;
 
 typedef enum {
-	JBIG2_OPTIONS_NONE = 0,
-	JBIG2_OPTIONS_EMBEDDED = 1
+    JBIG2_OPTIONS_NONE = 0,
+    JBIG2_OPTIONS_EMBEDDED = 1
 } Jbig2Options;
 
 /* forward public structure declarations */
@@ -57,8 +57,8 @@ struct _Jbig2Image {
     uint32_t width;
     uint32_t height;
     uint32_t stride;
-	int32_t refcount;
-	uint8_t *data;
+    int32_t refcount;
+    uint8_t *data;
 };
 
 /* errors are returned from the library via a callback. If no callback

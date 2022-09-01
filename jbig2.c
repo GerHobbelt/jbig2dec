@@ -55,9 +55,9 @@ static void *
 jbig2_default_alloc(Jbig2Allocator *allocator, size_t size)
 {
 #ifdef HAVE_MUPDF
-	return fz_malloc(fz_get_global_context(), size);
+    return fz_malloc(fz_get_global_context(), size);
 #else
-	return malloc(size);
+    return malloc(size);
 #endif
 }
 
@@ -65,9 +65,9 @@ static void
 jbig2_default_free(Jbig2Allocator *allocator, void *p)
 {
 #ifdef HAVE_MUPDF
-	fz_free(fz_get_global_context(), p);
+    fz_free(fz_get_global_context(), p);
 #else
-	free(p);
+    free(p);
 #endif
 }
 
@@ -75,9 +75,9 @@ static void *
 jbig2_default_realloc(Jbig2Allocator *allocator, void *p, size_t size)
 {
 #ifdef HAVE_MUPDF
-	return fz_realloc(fz_get_global_context(), p, size);
+    return fz_realloc(fz_get_global_context(), p, size);
 #else
-	return realloc(p, size);
+    return realloc(p, size);
 #endif
 }
 
@@ -103,24 +103,24 @@ static void
 jbig2_default_error(void *data, const char *msg, Jbig2Severity severity, uint32_t seg_idx)
 {
 #ifdef HAVE_MUPDF
-	fz_context* ctx = NULL;
-	char idxbuf[50] = "";
+    fz_context* ctx = NULL;
+    char idxbuf[50] = "";
 
-	if (seg_idx != JBIG2_UNKNOWN_SEGMENT_NUMBER)
-		fz_snprintf(idxbuf, sizeof idxbuf, " (segment 0x%02x)", seg_idx);
+    if (seg_idx != JBIG2_UNKNOWN_SEGMENT_NUMBER)
+        fz_snprintf(idxbuf, sizeof idxbuf, " (segment 0x%02x)", seg_idx);
 
-	if (severity == JBIG2_SEVERITY_FATAL)
-		fz_error(ctx, "jbig2dec error: %s%s", msg, idxbuf);
-	else if (severity == JBIG2_SEVERITY_WARNING)
-		fz_warn(ctx, "jbig2dec warning: %s%s", msg, idxbuf);
-	else if (severity == JBIG2_SEVERITY_INFO)
-		fz_info(ctx, "jbig2dec info: %s%s", msg, idxbuf);
-	else
-		fz_info(ctx, "jbig2dec debug: %s%s", msg, idxbuf);
+    if (severity == JBIG2_SEVERITY_FATAL)
+        fz_error(ctx, "jbig2dec error: %s%s", msg, idxbuf);
+    else if (severity == JBIG2_SEVERITY_WARNING)
+        fz_warn(ctx, "jbig2dec warning: %s%s", msg, idxbuf);
+    else if (severity == JBIG2_SEVERITY_INFO)
+        fz_info(ctx, "jbig2dec info: %s%s", msg, idxbuf);
+    else
+        fz_info(ctx, "jbig2dec debug: %s%s", msg, idxbuf);
 #else
-	/* report only fatal errors by default */
+    /* report only fatal errors by default */
     if (severity == JBIG2_SEVERITY_FATAL) {
-		fprintf(stderr, "jbig2 decoder FATAL ERROR: %s", msg);
+        fprintf(stderr, "jbig2 decoder FATAL ERROR: %s", msg);
         if (seg_idx != JBIG2_UNKNOWN_SEGMENT_NUMBER)
             fprintf(stderr, " (segment 0x%02x)", seg_idx);
         fprintf(stderr, "\n");
@@ -133,9 +133,9 @@ static Jbig2Severity prefilter_error_log_level = JBIG2_SEVERITY_WARNING;
 
 void jbig2_set_error_log_prefilter_level(Jbig2Severity level)
 {
-	if (level > JBIG2_SEVERITY_WARNING)
-		level = JBIG2_SEVERITY_WARNING;
-	prefilter_error_log_level = level;
+    if (level > JBIG2_SEVERITY_WARNING)
+        level = JBIG2_SEVERITY_WARNING;
+    prefilter_error_log_level = level;
 }
 
 int
@@ -145,9 +145,9 @@ jbig2_error(Jbig2Ctx *ctx, Jbig2Severity severity, uint32_t segment_number, cons
     va_list ap;
     int n;
 
-	// short-circuit the error callback/logger for (very) low severity messages:
-	if (severity < prefilter_error_log_level)
-		return -1;
+    // short-circuit the error callback/logger for (very) low severity messages:
+    if (severity < prefilter_error_log_level)
+        return -1;
 
     va_start(ap, fmt);
     n = vsnprintf(buf, sizeof(buf), fmt, ap);
@@ -163,12 +163,12 @@ jbig2_ctx_new_imp(Jbig2Allocator *allocator, Jbig2Options options, Jbig2GlobalCt
 {
     Jbig2Ctx *result;
 
-	if (allocator == NULL)
-		allocator = &jbig2_default_allocator;
-	if (error_callback == NULL)
-		error_callback = &jbig2_default_error;
+    if (allocator == NULL)
+        allocator = &jbig2_default_allocator;
+    if (error_callback == NULL)
+        error_callback = &jbig2_default_error;
 
-	if (jbig2_version_major != JBIG2_VERSION_MAJOR || jbig2_version_minor != JBIG2_VERSION_MINOR) {
+    if (jbig2_version_major != JBIG2_VERSION_MAJOR || jbig2_version_minor != JBIG2_VERSION_MINOR) {
         Jbig2Ctx fakectx;
         fakectx.error_callback = error_callback;
         fakectx.error_callback_data = error_callback_data;
@@ -510,14 +510,19 @@ jbig2_ctx_free(Jbig2Ctx *ctx)
     if (ctx->pages != NULL) {
         for (i = 0; i <= ctx->current_page; i++)
             if (ctx->pages[i].image != NULL)
-				if (jbig2_image_release(ctx, ctx->pages[i].image) != 1)
-				{
+            {
+                int refc = ctx->pages[i].image->refcount;
+                int rv = jbig2_image_release(ctx, ctx->pages[i].image);
+                ASSERT_AND_CONTINUE(rv == 1);
+                if (rv != 1)
+                {
 #ifdef HAVE_MUPDF
-					fz_error(NULL, "*!* corrupted refcount %d? (jbig2_ctx_free)\n", (int)ctx->pages[i].image->refcount);
+                    fz_error(NULL, "*!* corrupted refcount %d? (jbig2_ctx_free)\n", (int)refc);
 #else
-					fprintf(stderr, "*!* corrupted refcount %d? (jbig2_ctx_free)\n", (int)ctx->pages[i].image->refcount);
+                    fprintf(stderr, "*!* corrupted refcount %d? (jbig2_ctx_free)\n", (int)refc);
 #endif
-				}
+                }
+            }
         jbig2_free(ca, ctx->pages);
     }
 

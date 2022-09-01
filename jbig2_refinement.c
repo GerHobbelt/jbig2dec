@@ -152,23 +152,23 @@ jbig2_decode_refinement_template1_unopt(Jbig2Ctx *ctx,
     {
         static int count = 0;
         char name[32];
-		int code;
+        int code;
 
 #ifdef HAVE_LIBPNG
-		snprintf(name, 32, "refin-%d.png", count);
-		code = jbig2_image_write_png_file(ref, name);
+        snprintf(name, 32, "refin-%d.png", count);
+        code = jbig2_image_write_png_file(ref, name);
 #else
-		snprintf(name, 32, "refin-%d.pbm", count);
-		code = jbig2_image_write_pbm_file(ref, name);
+        snprintf(name, 32, "refin-%d.pbm", count);
+        code = jbig2_image_write_pbm_file(ref, name);
 #endif
         if (code < 0)
             return jbig2_error(ctx, JBIG2_SEVERITY_WARNING, segment->number, "failed to write refinement input");
 #ifdef HAVE_LIBPNG
-		snprintf(name, 32, "refout-%d.png", count);
-		code = jbig2_image_write_png_file(image, name);
+        snprintf(name, 32, "refout-%d.png", count);
+        code = jbig2_image_write_png_file(image, name);
 #else
-		snprintf(name, 32, "refout-%d.pbm", count);
-		code = jbig2_image_write_pbm_file(image, name);
+        snprintf(name, 32, "refout-%d.pbm", count);
+        code = jbig2_image_write_pbm_file(image, name);
 #endif
         if (code < 0)
             return jbig2_error(ctx, JBIG2_SEVERITY_WARNING, segment->number, "failed to write refinement output");
@@ -436,7 +436,7 @@ jbig2_region_find_referred(Jbig2Ctx *ctx, Jbig2Segment *segment)
 int
 jbig2_refinement_region(Jbig2Ctx *ctx, Jbig2Segment *segment, const byte *segment_data)
 {
-    Jbig2RefinementRegionParams params;
+    Jbig2RefinementRegionParams params = { 0 };
     Jbig2RegionSegmentInfo rsi;
     int offset = 0;
     byte seg_flags;
@@ -486,9 +486,18 @@ jbig2_refinement_region(Jbig2Ctx *ctx, Jbig2Segment *segment, const byte *segmen
            rules say to use the first one available, and not to
            reuse any intermediate result, so we simply take another
            reference to it and free the original to keep track of this. */
-        params.GRREFERENCE = jbig2_image_reference(ctx, (Jbig2Image *) ref->result);
-		VERIFY_AND_CONTINUE(jbig2_image_release(ctx, (Jbig2Image *) ref->result) == 1);
+#if 01
+        // ^^^ which is the same as applying a move semantic to the image:
+        params.GRREFERENCE = (Jbig2Image*)ref->result;
         ref->result = NULL;
+#else
+        params.GRREFERENCE = jbig2_image_reference(ctx, (Jbig2Image *) ref->result);
+        {
+            int rv = jbig2_image_release(ctx, (Jbig2Image*)ref->result);
+            VERIFY_AND_CONTINUE(rv == 1 || rv == 0);
+        }
+        ref->result = NULL;
+#endif
         jbig2_error(ctx, JBIG2_SEVERITY_DEBUG, segment->number, "found reference bitmap in segment %d", ref->number);
     } else {
         /* the reference is just (a subset of) the page buffer */
@@ -556,8 +565,8 @@ jbig2_refinement_region(Jbig2Ctx *ctx, Jbig2Segment *segment, const byte *segmen
         }
 
 cleanup:
-		VERIFY_AND_CONTINUE(jbig2_image_release(ctx, image) == 1);
-		VERIFY_AND_CONTINUE(jbig2_image_release(ctx, params.GRREFERENCE) == 1);
+        VERIFY_AND_CONTINUE_EQ(jbig2_image_release(ctx, image), 1);
+        VERIFY_AND_CONTINUE_EQ(jbig2_image_release(ctx, params.GRREFERENCE), 1);
         jbig2_free(ctx->allocator, as);
         jbig2_word_stream_buf_free(ctx, ws);
         jbig2_free(ctx->allocator, GR_stats);

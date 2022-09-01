@@ -45,7 +45,7 @@
 
 int main(int argc, const char** argv)
 {
-	Jbig2Ctx *ctx;
+    Jbig2Ctx *ctx;
     Jbig2Image *image;
     int code;
 
@@ -77,8 +77,8 @@ int main(int argc, const char** argv)
 
 int main(int argc, const char** argv)
 {
-	fprintf(stderr, "%s: this tool is not supported in this build (no PNG library built-in).\n", argv[0]);
-	return 1;
+    fprintf(stderr, "%s: this tool is not supported in this build (no PNG library built-in).\n", argv[0]);
+    return 1;
 }
 
 #endif

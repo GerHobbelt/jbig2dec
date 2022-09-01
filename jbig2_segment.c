@@ -158,8 +158,10 @@ jbig2_free_segment(Jbig2Ctx *ctx, Jbig2Segment *segment)
         break;
     case 4:                    /* intermediate text region */
     case 40:                   /* intermediate refinement region */
-        if (segment->result != NULL)
-			VERIFY_AND_CONTINUE(jbig2_image_release(ctx, (Jbig2Image *) segment->result) == 1);
+		if (segment->result != NULL)
+		{
+			VERIFY_AND_CONTINUE_EQ(jbig2_image_release(ctx, (Jbig2Image*)segment->result), 1);
+		}
         break;
     case 16:                   /* pattern dictionary */
         if (segment->result != NULL)

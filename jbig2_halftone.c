@@ -81,7 +81,9 @@ jbig2_hd_new(Jbig2Ctx *ctx, const Jbig2PatternDictParams *params, Jbig2Image *im
                 jbig2_error(ctx, JBIG2_SEVERITY_WARNING, JBIG2_UNKNOWN_SEGMENT_NUMBER, "failed to allocate pattern element image");
                 /* new->patterns[i] above did not succeed, so releasing patterns 0..i-1 is enough */
                 for (j = 0; j < i; j++)
-					VERIFY_AND_CONTINUE(jbig2_image_release(ctx, new->patterns[j]) == 1);
+                {
+                    VERIFY_AND_CONTINUE_EQ(jbig2_image_release(ctx, new->patterns[j]), 1);
+                }
                 jbig2_free(ctx->allocator, new->patterns);
                 jbig2_free(ctx->allocator, new);
                 return NULL;
@@ -94,7 +96,9 @@ jbig2_hd_new(Jbig2Ctx *ctx, const Jbig2PatternDictParams *params, Jbig2Image *im
                 jbig2_error(ctx, JBIG2_SEVERITY_WARNING, JBIG2_UNKNOWN_SEGMENT_NUMBER, "failed to compose image into collective bitmap dictionary");
                 /* new->patterns[i] above succeeded, so release all patterns 0..i */
                 for (j = 0; j <= i; j++)
-					VERIFY_AND_CONTINUE(jbig2_image_release(ctx, new->patterns[j]) == 1);
+                {
+                    VERIFY_AND_CONTINUE_EQ(jbig2_image_release(ctx, new->patterns[j]), 1);
+                }
                 jbig2_free(ctx->allocator, new->patterns);
                 jbig2_free(ctx->allocator, new);
                 return NULL;
@@ -119,14 +123,19 @@ jbig2_hd_release(Jbig2Ctx *ctx, Jbig2PatternDict *dict)
         return;
     if (dict->patterns != NULL)
         for (i = 0; i < dict->n_patterns; i++)
-			if (jbig2_image_release(ctx, dict->patterns[i]) != 1)
-			{
+        {
+            int refc = dict->patterns[i]->refcount;
+            int rv = jbig2_image_release(ctx, dict->patterns[i]);
+            ASSERT_AND_CONTINUE(rv == 1);
+            if (rv != 1)
+            {
 #ifdef HAVE_MUPDF
-				fz_error(NULL, "*!* corrupted refcount %d? (jbig2_hd_release)\n", (int)dict->patterns[i]->refcount);
+                fz_error(NULL, "*!* corrupted refcount %d? (jbig2_hd_release)\n", (int)refc);
 #else
-				fprintf(stderr, "*!* corrupted refcount %d? (jbig2_hd_release)\n", (int)dict->patterns[i]->refcount);
+                fprintf(stderr, "*!* corrupted refcount %d? (jbig2_hd_release)\n", (int)refc);
 #endif
-			}
+            }
+        }
     jbig2_free(ctx->allocator, dict->patterns);
     jbig2_free(ctx->allocator, dict);
 }
@@ -153,7 +162,7 @@ jbig2_decode_pattern_dict(Jbig2Ctx *ctx, Jbig2Segment *segment,
 {
     Jbig2PatternDict *hd = NULL;
     Jbig2Image *image = NULL;
-    Jbig2GenericRegionParams rparams;
+    Jbig2GenericRegionParams rparams = { 0 };
     int code = 0;
 
     /* allocate the collective image */
@@ -202,7 +211,8 @@ jbig2_decode_pattern_dict(Jbig2Ctx *ctx, Jbig2Segment *segment,
         hd = jbig2_hd_new(ctx, params, image);
     else
         jbig2_error(ctx, JBIG2_SEVERITY_WARNING, segment->number, "failed to decode immediate generic region");
-    VERIFY_AND_CONTINUE(jbig2_image_release(ctx, image) == 1);
+
+    VERIFY_AND_CONTINUE_EQ(jbig2_image_release(ctx, image), 1);
 
     return hd;
 }
@@ -291,7 +301,7 @@ jbig2_decode_gray_scale_image(Jbig2Ctx *ctx, Jbig2Segment *segment,
     uint32_t i, j, stride, x, y;
     int code;
     Jbig2Image **GSPLANES;
-    Jbig2GenericRegionParams rparams;
+    Jbig2GenericRegionParams rparams = { 0 };
     Jbig2WordStream *ws = NULL;
     Jbig2ArithState *as = NULL;
 
@@ -308,14 +318,20 @@ jbig2_decode_gray_scale_image(Jbig2Ctx *ctx, Jbig2Segment *segment,
             jbig2_error(ctx, JBIG2_SEVERITY_WARNING, segment->number, "failed to allocate %dx%d image for GSPLANES", GSW, GSH);
             /* free already allocated */
             for (j = i; j > 0;)
-				if (jbig2_image_release(ctx, GSPLANES[--j]) != 1)
-				{
+            {
+                j--;
+                int refc = GSPLANES[j]->refcount;
+                int rv = jbig2_image_release(ctx, GSPLANES[j]);
+                ASSERT_AND_CONTINUE(rv == 1);
+                if (rv != 1)
+                {
 #ifdef HAVE_MUPDF
-					fz_error(NULL, "*!* corrupted refcount %d? (jbig2_decode_gray_scale_image::GSPLANES)\n", (int)GSPLANES[j + 1]->refcount);
+                    fz_error(NULL, "*!* corrupted refcount %d? (jbig2_decode_gray_scale_image::GSPLANES)\n", (int)refc);
 #else
-					fprintf(stderr, "*!* corrupted refcount %d? (jbig2_decode_gray_scale_image::GSPLANES)\n", (int)GSPLANES[j + 1]->refcount);
+                    fprintf(stderr, "*!* corrupted refcount %d? (jbig2_decode_gray_scale_image::GSPLANES)\n", (int)refc);
 #endif
-				}
+                }
+            }
             jbig2_free(ctx->allocator, GSPLANES);
             return NULL;
         }
@@ -327,7 +343,7 @@ jbig2_decode_gray_scale_image(Jbig2Ctx *ctx, Jbig2Segment *segment,
     rparams.GBTEMPLATE = GSTEMPLATE;
     rparams.TPGDON = 0;
     rparams.USESKIP = GSUSESKIP;
-    rparams.SKIP = GSKIP;
+    rparams.SKIP = jbig2_image_reference(ctx, GSKIP);
     rparams.gbat[0] = (GSTEMPLATE <= 1 ? 3 : 2);
     rparams.gbat[1] = -1;
     rparams.gbat[2] = -3;
@@ -421,16 +437,27 @@ cleanup:
         jbig2_word_stream_buf_free(ctx, ws);
     }
     for (i = 0; i < GSBPP; ++i)
-		if (jbig2_image_release(ctx, GSPLANES[i]) != 1)
-		{
+    {
+        int refc = GSPLANES[i]->refcount;
+        int rv = jbig2_image_release(ctx, GSPLANES[i]);
+        ASSERT_AND_CONTINUE(rv == 1);
+        if (rv != 1)
+        {
 #ifdef HAVE_MUPDF
-			fz_error(NULL, "*!* corrupted refcount %d? (jbig2_decode_gray_scale_image)\n", (int)GSPLANES[i]->refcount);
+            fz_error(NULL, "*!* corrupted refcount %d? (jbig2_decode_gray_scale_image)\n", (int)refc);
 #else
-			fprintf(stderr, "*!* corrupted refcount %d? (jbig2_decode_gray_scale_image)\n", (int)GSPLANES[i]->refcount);
+            fprintf(stderr, "*!* corrupted refcount %d? (jbig2_decode_gray_scale_image)\n", (int)refc);
 #endif
-		}
+        }
+    }
 
     jbig2_free(ctx->allocator, GSPLANES);
+
+    {
+        int rv = jbig2_image_release(ctx, rparams.SKIP);
+        ASSERT_AND_CONTINUE(rv == 1 || rv == 0);
+        rparams.SKIP = NULL;
+    }
 
     return GSVALS;
 }
@@ -573,7 +600,7 @@ cleanup:
         }
     }
     jbig2_free(ctx->allocator, GI);
-    VERIFY_AND_CONTINUE(jbig2_image_release(ctx, HSKIP) == 1);
+    VERIFY_AND_CONTINUE_EQ(jbig2_image_release(ctx, HSKIP), 1);
 
     return code;
 }
@@ -663,7 +690,7 @@ jbig2_halftone_region(Jbig2Ctx *ctx, Jbig2Segment *segment, const byte *segment_
 
     code = jbig2_decode_halftone_region(ctx, segment, &params, segment_data + offset, segment->data_length - offset, image, GB_stats);
     if (code < 0) {
-		VERIFY_AND_CONTINUE(jbig2_image_release(ctx, image) == 1);
+        VERIFY_AND_CONTINUE_EQ(jbig2_image_release(ctx, image), 1);
         jbig2_free(ctx->allocator, GB_stats);
         return jbig2_error(ctx, JBIG2_SEVERITY_WARNING, segment->number, "failed to decode halftone region");
     }
@@ -675,11 +702,11 @@ jbig2_halftone_region(Jbig2Ctx *ctx, Jbig2Segment *segment, const byte *segment_
 
     code = jbig2_page_add_result(ctx, &ctx->pages[ctx->current_page], image, region_info.x, region_info.y, region_info.op);
     if (code < 0) {
-		VERIFY_AND_CONTINUE(jbig2_image_release(ctx, image) == 1);
+        VERIFY_AND_CONTINUE_EQ(jbig2_image_release(ctx, image), 1);
         return jbig2_error(ctx, JBIG2_SEVERITY_WARNING, segment->number, "unable to add halftone region to page");
     }
 
-	VERIFY_AND_CONTINUE(jbig2_image_release(ctx, image) == 1);
+    VERIFY_AND_CONTINUE_EQ(jbig2_image_release(ctx, image), 1);
 
     return code;
 

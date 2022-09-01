@@ -70,7 +70,7 @@ jbig2_decode_mmr_init(Jbig2MmrCtx *mmr, int width, int height, const byte *data,
 
     while (mmr->bit_index >= 8 && mmr->data_index < mmr->size) {
         mmr->bit_index -= 8;
-        mmr->word |= (((uint32_t)mmr->data[mmr->data_index]) << mmr->bit_index);
+        mmr->word |= (mmr->data[mmr->data_index] << mmr->bit_index);
         mmr->data_index++;
     }
 }

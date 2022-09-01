@@ -1518,7 +1518,7 @@ cleanup:
     jbig2_free(ctx->allocator, as);
     jbig2_word_stream_buf_free(ctx, ws);
     jbig2_free(ctx->allocator, GB_stats);
-    VERIFY_AND_CONTINUE(jbig2_image_release(ctx, image) == 1);
+    VERIFY_AND_CONTINUE_EQ(jbig2_image_release(ctx, image), 1);
 
     return code;
 }
