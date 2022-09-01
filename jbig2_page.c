@@ -84,22 +84,30 @@ jbig2_page_info(Jbig2Ctx *ctx, Jbig2Segment *segment, const uint8_t *segment_dat
             if (index >= ctx->max_page_index) {
                 /* grow the list */
 
-                if (ctx->max_page_index == UINT32_MAX) {
-                    return jbig2_error(ctx, JBIG2_SEVERITY_FATAL, segment->number, "too many pages in jbig2 image");
-                }
-                else if (ctx->max_page_index > (UINT32_MAX >> 2)) {
+                if (ctx->max_page_index >= (UINT32_MAX >> 2)) {
                     ctx->max_page_index = UINT32_MAX;
-                }
+					return jbig2_error(ctx, JBIG2_SEVERITY_FATAL, segment->number, "too many pages in jbig2 image");
+				}
 
-                pages = jbig2_renew(ctx, ctx->pages, Jbig2Page, (ctx->max_page_index <<= 2));
+				uint32_t old_size = ctx->max_page_index;
+				ctx->max_page_index <<= 2;
+                pages = jbig2_renew(ctx, ctx->pages, Jbig2Page, ctx->max_page_index);
                 if (pages == NULL) {
                     return jbig2_error(ctx, JBIG2_SEVERITY_FATAL, segment->number, "failed to reallocate pages");
                 }
                 ctx->pages = pages;
-                for (j = index; j < ctx->max_page_index; j++) {
-                    ctx->pages[j].state = JBIG2_PAGE_FREE;
-                    ctx->pages[j].number = 0;
-                    ctx->pages[j].image = NULL;
+                for (j = old_size; j < ctx->max_page_index; j++) {
+					ctx->pages[j].state = JBIG2_PAGE_FREE;
+					ctx->pages[j].number = 0;
+					ctx->pages[j].width = 0;
+					ctx->pages[j].height = 0xffffffff;
+					ctx->pages[j].x_resolution = 0;
+					ctx->pages[j].y_resolution = 0;
+					ctx->pages[j].stripe_size = 0;
+					ctx->pages[j].striped = 0;
+					ctx->pages[j].end_row = 0;
+					ctx->pages[j].flags = 0;
+					ctx->pages[j].image = NULL;
                 }
             }
         }
