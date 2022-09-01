@@ -127,14 +127,6 @@ jbig2_hd_release(Jbig2Ctx *ctx, Jbig2PatternDict *dict)
             int refc = dict->patterns[i]->refcount;
             int rv = jbig2_image_release(ctx, dict->patterns[i]);
             ASSERT_AND_CONTINUE(rv == 1);
-            if (rv != 1)
-            {
-#ifdef HAVE_MUPDF
-                fz_error(NULL, "*!* corrupted refcount %d? (jbig2_hd_release)\n", (int)refc);
-#else
-                fprintf(stderr, "*!* corrupted refcount %d? (jbig2_hd_release)\n", (int)refc);
-#endif
-            }
         }
     jbig2_free(ctx->allocator, dict->patterns);
     jbig2_free(ctx->allocator, dict);
@@ -323,14 +315,6 @@ jbig2_decode_gray_scale_image(Jbig2Ctx *ctx, Jbig2Segment *segment,
                 int refc = GSPLANES[j]->refcount;
                 int rv = jbig2_image_release(ctx, GSPLANES[j]);
                 ASSERT_AND_CONTINUE(rv == 1);
-                if (rv != 1)
-                {
-#ifdef HAVE_MUPDF
-                    fz_error(NULL, "*!* corrupted refcount %d? (jbig2_decode_gray_scale_image::GSPLANES)\n", (int)refc);
-#else
-                    fprintf(stderr, "*!* corrupted refcount %d? (jbig2_decode_gray_scale_image::GSPLANES)\n", (int)refc);
-#endif
-                }
             }
             jbig2_free(ctx->allocator, GSPLANES);
             return NULL;
@@ -441,21 +425,13 @@ cleanup:
         int refc = GSPLANES[i]->refcount;
         int rv = jbig2_image_release(ctx, GSPLANES[i]);
         ASSERT_AND_CONTINUE(rv == 1);
-        if (rv != 1)
-        {
-#ifdef HAVE_MUPDF
-            fz_error(NULL, "*!* corrupted refcount %d? (jbig2_decode_gray_scale_image)\n", (int)refc);
-#else
-            fprintf(stderr, "*!* corrupted refcount %d? (jbig2_decode_gray_scale_image)\n", (int)refc);
-#endif
-        }
     }
 
     jbig2_free(ctx->allocator, GSPLANES);
 
     {
         int rv = jbig2_image_release(ctx, rparams.SKIP);
-        ASSERT_AND_CONTINUE(rv == 1 || rv == 0);
+        ASSERT_AND_CONTINUE(rv == 1);
         rparams.SKIP = NULL;
     }
 

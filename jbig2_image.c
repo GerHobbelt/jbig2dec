@@ -212,6 +212,7 @@ jbig2_image_resize(Jbig2Ctx *ctx, Jbig2Image *image, uint32_t width, uint32_t he
         /* if refcount > 1 the original image, its pointer must
         be kept, so simply replaces its innards, and throw away
         the empty new image shell. */
+		ASSERT_AND_CONTINUE(image->refcount >= 1);
         jbig2_free(ctx->allocator, image->data);
         image->width = newimage->width;
         image->height = newimage->height;
