@@ -1141,7 +1141,7 @@ static int Memento_Internal_checkFreedBlock(Memento_BlkHeader *b, void *arg)
                 goto mismatch4;
             p += 4;
             i -= 4;
-	} while (i > 0);
+    } while (i > 0);
         i += 4;
     }
     if (i & 2) {
@@ -2103,112 +2103,112 @@ static void do_reference(Memento_BlkHeader *blk, int event)
 
 int Memento_checkPointerOrNull(void *blk)
 {
-	if (blk == NULL)
-		return 0;
-	if (blk == MEMENTO_PREFILL_PTR)
-		fprintf(stderr, "Prefill value found as pointer - buffer underrun?\n");
-	else if (blk == MEMENTO_POSTFILL_PTR)
-		fprintf(stderr, "Postfill value found as pointer - buffer overrun?\n");
-	else if (blk == MEMENTO_ALLOCFILL_PTR)
-		fprintf(stderr, "Allocfill value found as pointer - use of uninitialised value?\n");
-	else if (blk == MEMENTO_FREEFILL_PTR)
-		fprintf(stderr, "Allocfill value found as pointer - use after free?\n");
-	else
-		return 0;
+    if (blk == NULL)
+        return 0;
+    if (blk == MEMENTO_PREFILL_PTR)
+        fprintf(stderr, "Prefill value found as pointer - buffer underrun?\n");
+    else if (blk == MEMENTO_POSTFILL_PTR)
+        fprintf(stderr, "Postfill value found as pointer - buffer overrun?\n");
+    else if (blk == MEMENTO_ALLOCFILL_PTR)
+        fprintf(stderr, "Allocfill value found as pointer - use of uninitialised value?\n");
+    else if (blk == MEMENTO_FREEFILL_PTR)
+        fprintf(stderr, "Allocfill value found as pointer - use after free?\n");
+    else
+        return 0;
 #ifdef MEMENTO_DETAILS
-	fprintf(stderr, "Current backtrace:\n");
-	Memento_bt();
-	fprintf(stderr, "History:\n");
-	Memento_info(blk);
+    fprintf(stderr, "Current backtrace:\n");
+    Memento_bt();
+    fprintf(stderr, "History:\n");
+    Memento_info(blk);
 #endif
-	return 1;
+    return 1;
 }
 
 int Memento_checkBytePointerOrNull(void *blk)
 {
-	unsigned char i;
-	if (blk == NULL)
-		return 0;
-	Memento_checkPointerOrNull(blk);
+    unsigned char i;
+    if (blk == NULL)
+        return 0;
+    Memento_checkPointerOrNull(blk);
 
-	i = *(unsigned int *)blk;
+    i = *(unsigned int *)blk;
 
-	if (i == MEMENTO_PREFILL_UBYTE)
-		fprintf(stderr, "Prefill value found - buffer underrun?\n");
-	else if (i == MEMENTO_POSTFILL_UBYTE)
-		fprintf(stderr, "Postfill value found - buffer overrun?\n");
-	else if (i == MEMENTO_ALLOCFILL_UBYTE)
-		fprintf(stderr, "Allocfill value found - use of uninitialised value?\n");
-	else if (i == MEMENTO_FREEFILL_UBYTE)
-		fprintf(stderr, "Allocfill value found - use after free?\n");
-	else
-		return 0;
+    if (i == MEMENTO_PREFILL_UBYTE)
+        fprintf(stderr, "Prefill value found - buffer underrun?\n");
+    else if (i == MEMENTO_POSTFILL_UBYTE)
+        fprintf(stderr, "Postfill value found - buffer overrun?\n");
+    else if (i == MEMENTO_ALLOCFILL_UBYTE)
+        fprintf(stderr, "Allocfill value found - use of uninitialised value?\n");
+    else if (i == MEMENTO_FREEFILL_UBYTE)
+        fprintf(stderr, "Allocfill value found - use after free?\n");
+    else
+        return 0;
 #ifdef MEMENTO_DETAILS
-	fprintf(stderr, "Current backtrace:\n");
-	Memento_bt();
-	fprintf(stderr, "History:\n");
-	Memento_info(blk);
+    fprintf(stderr, "Current backtrace:\n");
+    Memento_bt();
+    fprintf(stderr, "History:\n");
+    Memento_info(blk);
 #endif
-	Memento_breakpoint();
-	return 1;
+    Memento_breakpoint();
+    return 1;
 }
 
 int Memento_checkShortPointerOrNull(void *blk)
 {
-	unsigned short i;
-	if (blk == NULL)
-		return 0;
-	Memento_checkPointerOrNull(blk);
+    unsigned short i;
+    if (blk == NULL)
+        return 0;
+    Memento_checkPointerOrNull(blk);
 
-	i = *(unsigned short *)blk;
+    i = *(unsigned short *)blk;
 
-	if (i == MEMENTO_PREFILL_USHORT)
-		fprintf(stderr, "Prefill value found - buffer underrun?\n");
-	else if (i == MEMENTO_POSTFILL_USHORT)
-		fprintf(stderr, "Postfill value found - buffer overrun?\n");
-	else if (i == MEMENTO_ALLOCFILL_USHORT)
-		fprintf(stderr, "Allocfill value found - use of uninitialised value?\n");
-	else if (i == MEMENTO_FREEFILL_USHORT)
-		fprintf(stderr, "Allocfill value found - use after free?\n");
-	else
-		return 0;
+    if (i == MEMENTO_PREFILL_USHORT)
+        fprintf(stderr, "Prefill value found - buffer underrun?\n");
+    else if (i == MEMENTO_POSTFILL_USHORT)
+        fprintf(stderr, "Postfill value found - buffer overrun?\n");
+    else if (i == MEMENTO_ALLOCFILL_USHORT)
+        fprintf(stderr, "Allocfill value found - use of uninitialised value?\n");
+    else if (i == MEMENTO_FREEFILL_USHORT)
+        fprintf(stderr, "Allocfill value found - use after free?\n");
+    else
+        return 0;
 #ifdef MEMENTO_DETAILS
-	fprintf(stderr, "Current backtrace:\n");
-	Memento_bt();
-	fprintf(stderr, "History:\n");
-	Memento_info(blk);
+    fprintf(stderr, "Current backtrace:\n");
+    Memento_bt();
+    fprintf(stderr, "History:\n");
+    Memento_info(blk);
 #endif
-	Memento_breakpoint();
-	return 1;
+    Memento_breakpoint();
+    return 1;
 }
 
 int Memento_checkIntPointerOrNull(void *blk)
 {
-	unsigned int i;
-	if (blk == NULL)
-		return 0;
-	Memento_checkPointerOrNull(blk);
+    unsigned int i;
+    if (blk == NULL)
+        return 0;
+    Memento_checkPointerOrNull(blk);
 
-	i = *(unsigned int *)blk;
+    i = *(unsigned int *)blk;
 
-	if (i == MEMENTO_PREFILL_UINT)
-		fprintf(stderr, "Prefill value found - buffer underrun?\n");
-	else if (i == MEMENTO_POSTFILL_UINT)
-		fprintf(stderr, "Postfill value found - buffer overrun?\n");
-	else if (i == MEMENTO_ALLOCFILL_UINT)
-		fprintf(stderr, "Allocfill value found - use of uninitialised value?\n");
-	else if (i == MEMENTO_FREEFILL_UINT)
-		fprintf(stderr, "Allocfill value found - use after free?\n");
-	else
-		return 0;
+    if (i == MEMENTO_PREFILL_UINT)
+        fprintf(stderr, "Prefill value found - buffer underrun?\n");
+    else if (i == MEMENTO_POSTFILL_UINT)
+        fprintf(stderr, "Postfill value found - buffer overrun?\n");
+    else if (i == MEMENTO_ALLOCFILL_UINT)
+        fprintf(stderr, "Allocfill value found - use of uninitialised value?\n");
+    else if (i == MEMENTO_FREEFILL_UINT)
+        fprintf(stderr, "Allocfill value found - use after free?\n");
+    else
+        return 0;
 #ifdef MEMENTO_DETAILS
-	fprintf(stderr, "Current backtrace:\n");
-	Memento_bt();
-	fprintf(stderr, "History:\n");
-	Memento_info(blk);
+    fprintf(stderr, "Current backtrace:\n");
+    Memento_bt();
+    fprintf(stderr, "History:\n");
+    Memento_info(blk);
 #endif
-	Memento_breakpoint();
-	return 1;
+    Memento_breakpoint();
+    return 1;
 }
 
 static void *do_takeRef(void *blk)
