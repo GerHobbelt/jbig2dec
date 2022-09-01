@@ -508,10 +508,10 @@ jbig2_ctx_free(Jbig2Ctx *ctx)
     }
 
     if (ctx->pages != NULL) {
-        for (i = 0; i <= ctx->current_page; i++)
+        for (i = 0; i < ctx->max_page_index; i++)
             if (ctx->pages[i].image != NULL)
             {
-                int refc = ctx->pages[i].image->refcount;
+				ASSERT_AND_CONTINUE(i < ctx->current_page);
                 int rv = jbig2_image_release(ctx, ctx->pages[i].image);
                 ASSERT_AND_CONTINUE(rv == 1);
             }
