@@ -355,7 +355,9 @@ jbig2_page_out(Jbig2Ctx *ctx)
 }
 
 /**
- * jbig2_release_page: tell the library a page can be freed
+ * jbig2_release_page: tell the library a page can be freed.
+ *
+ * Note: the page is assumed to be obtained from a call to jbig2_page_out().
  **/
 void
 jbig2_release_page(Jbig2Ctx *ctx, Jbig2Image *image)
@@ -370,8 +372,16 @@ jbig2_release_page(Jbig2Ctx *ctx, Jbig2Image *image)
     {
         if (ctx->pages[index].image == image)
         {
-            int rv = jbig2_image_release(ctx, image);
-            ASSERT_AND_CONTINUE(rv == 1 || rv == 0);
+			// as the page is assumed to be obtained from a call to jbig2_page_out(),
+			// we must correct for that one incrementing the reference count upon
+			// delivering the image reference to the userland code: we decrement
+			// the reference counter for that action as well:
+			int rv = jbig2_image_release(ctx, image);
+			ASSERT_AND_CONTINUE(rv == 0);
+
+			// now decrement for the pages[] reference itself:
+            rv = jbig2_image_release(ctx, image);
+            ASSERT_AND_CONTINUE(rv == 1);
             ctx->pages[index].image = NULL;
 
             ctx->pages[index].state = JBIG2_PAGE_RELEASED;
