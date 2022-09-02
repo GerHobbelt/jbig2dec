@@ -93,6 +93,7 @@ struct _Jbig2Allocator {
     void *(*alloc_)(Jbig2Allocator *allocator, size_t size);
     void (*free_)(Jbig2Allocator *allocator, void *p);
     void *(*realloc_)(Jbig2Allocator *allocator, void *p, size_t size);
+	void *user_context;
 };
 
 /* decoder context */

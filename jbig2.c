@@ -55,7 +55,7 @@ static void *
 jbig2_default_alloc(Jbig2Allocator *allocator, size_t size)
 {
 #ifdef HAVE_MUPDF
-    return fz_malloc(fz_get_global_context(), size);
+    return fz_malloc(allocator->user_context, size);
 #else
     return malloc(size);
 #endif
@@ -65,7 +65,7 @@ static void
 jbig2_default_free(Jbig2Allocator *allocator, void *p)
 {
 #ifdef HAVE_MUPDF
-    fz_free(fz_get_global_context(), p);
+    fz_free(allocator->user_context, p);
 #else
     free(p);
 #endif
@@ -75,7 +75,7 @@ static void *
 jbig2_default_realloc(Jbig2Allocator *allocator, void *p, size_t size)
 {
 #ifdef HAVE_MUPDF
-    return fz_realloc(fz_get_global_context(), p, size);
+    return fz_realloc(allocator->user_context, p, size);
 #else
     return realloc(p, size);
 #endif
@@ -164,7 +164,10 @@ jbig2_ctx_new_imp(Jbig2Allocator *allocator, Jbig2Options options, Jbig2GlobalCt
     Jbig2Ctx *result;
 
     if (allocator == NULL)
+    {
         allocator = &jbig2_default_allocator;
+        allocator->user_context = fz_get_global_context();
+    }
     if (error_callback == NULL)
         error_callback = &jbig2_default_error;
 
@@ -511,7 +514,7 @@ jbig2_ctx_free(Jbig2Ctx *ctx)
         for (i = 0; i < ctx->max_page_index; i++)
             if (ctx->pages[i].image != NULL)
             {
-				ASSERT_AND_CONTINUE(i < ctx->current_page);
+                ASSERT_AND_CONTINUE(i < ctx->current_page);
                 int rv = jbig2_image_release(ctx, ctx->pages[i].image);
                 ASSERT_AND_CONTINUE(rv == 1);
             }

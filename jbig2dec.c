@@ -21,6 +21,10 @@
 #include "config.h"
 #endif
 
+#ifdef HAVE_MUPDF
+#include "mupdf/fitz.h"
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
@@ -149,7 +153,11 @@ static void *jbig2dec_alloc(Jbig2Allocator *allocator_, size_t size)
     if (size + ALIGNMENT > allocator->memory_limit - allocator->memory_used)
         return jbig2dec_reached_limit(allocator, 0, size + ALIGNMENT);
 
-    ptr = malloc(size + ALIGNMENT);
+#ifdef HAVE_MUPDF
+	ptr = fz_malloc(allocator->super.user_context, size + ALIGNMENT);
+#else
+	ptr = malloc(size + ALIGNMENT);
+#endif
     if (ptr == NULL)
         return NULL;
     memcpy(ptr, &size, sizeof(size));
@@ -170,7 +178,11 @@ static void jbig2dec_free(Jbig2Allocator *allocator_, void *p)
 
     memcpy(&size, (unsigned char *) p - ALIGNMENT, sizeof(size));
     allocator->memory_used -= size + ALIGNMENT;
-    free((unsigned char *) p - ALIGNMENT);
+#ifdef HAVE_MUPDF
+	fz_free(allocator->super.user_context, (unsigned char*)p - ALIGNMENT);
+#else
+	free((unsigned char *) p - ALIGNMENT);
+#endif
 }
 
 static void *jbig2dec_realloc(Jbig2Allocator *allocator_, void *p, size_t size)
@@ -197,7 +209,11 @@ static void *jbig2dec_realloc(Jbig2Allocator *allocator_, void *p, size_t size)
     if (size + ALIGNMENT > allocator->memory_limit - allocator->memory_used + oldsize + ALIGNMENT)
         return jbig2dec_reached_limit(allocator, oldsize + ALIGNMENT, size + ALIGNMENT);
 
-    p = realloc(oldp, size + ALIGNMENT);
+#ifdef HAVE_MUPDF
+	p = fz_realloc(allocator->super.user_context, oldp, size + ALIGNMENT);
+#else
+	p = realloc(oldp, size + ALIGNMENT);
+#endif
     if (p == NULL)
         return NULL;
 
@@ -652,7 +668,10 @@ int main(int argc, const char** argv)
             allocator->super.alloc_ = jbig2dec_alloc;
             allocator->super.free_ = jbig2dec_free;
             allocator->super.realloc_ = jbig2dec_realloc;
-            allocator->ctx = NULL;
+#ifdef HAVE_MUPDF
+			allocator->super.user_context = fz_get_global_context();
+#endif
+			allocator->ctx = NULL;
             allocator->memory_limit = params.memory_limit;
             allocator->memory_used = 0;
             allocator->memory_peak = 0;
