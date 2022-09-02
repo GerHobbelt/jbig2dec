@@ -36,7 +36,7 @@
 #include "mupdf/fitz/config.h"
 #include "mupdf/fitz/system.h"
 #include "mupdf/fitz/context.h"
-#include "mupdf/assert.h"
+#include "mupdf/assertions.h"
 
 static inline void fz_lock_jbig2(fz_context* ctx)
 {

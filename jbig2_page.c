@@ -35,7 +35,7 @@
 #include "jbig2_segment.h"
 
 #ifdef HAVE_MUPDF
-#include "mupdf/assert.h"
+#include "mupdf/assertions.h"
 #endif
 
 /* dump the page struct info */

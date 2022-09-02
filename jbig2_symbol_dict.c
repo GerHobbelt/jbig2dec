@@ -47,7 +47,7 @@
 #include "jbig2_image_rw.h"
 
 #ifdef HAVE_MUPDF
-#include "mupdf/assert.h"
+#include "mupdf/assertions.h"
 #endif
 
 

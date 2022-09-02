@@ -37,7 +37,7 @@
 #include "jbig2_segment.h"
 
 #ifdef HAVE_MUPDF
-#include "mupdf/assert.h"
+#include "mupdf/assertions.h"
 #include "mupdf/fitz.h"
 #endif
 

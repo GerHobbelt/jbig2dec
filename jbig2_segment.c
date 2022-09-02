@@ -40,7 +40,7 @@
 #include "jbig2_text.h"
 
 #ifdef HAVE_MUPDF
-#include "mupdf/assert.h"
+#include "mupdf/assertions.h"
 #endif
 
 Jbig2Segment *
