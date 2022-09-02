@@ -40,12 +40,12 @@
 
 static inline void fz_lock_jbig2(fz_context* ctx)
 {
-    //fz_lock(ctx, FZ_LOCK_JBIG2, __FILE__, __LINE__);
+    fz_lock(ctx, FZ_LOCK_JBIG2_INTERNAL);
 }
 
 static inline void fz_unlock_jbig2(fz_context* ctx)
 {
-    //fz_unlock(ctx, FZ_LOCK_JBIG2);
+    fz_unlock(ctx, FZ_LOCK_JBIG2_INTERNAL);
 }
 
 #endif
