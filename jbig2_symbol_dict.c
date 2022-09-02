@@ -47,6 +47,7 @@
 #include "jbig2_image_rw.h"
 
 #ifdef HAVE_MUPDF
+#define CTX   ((fz_context *)ctx->allocator->user_context)
 #include "mupdf/assertions.h"
 #endif
 

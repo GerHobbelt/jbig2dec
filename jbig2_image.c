@@ -31,12 +31,13 @@
 #include "jbig2_image.h"
 
 #ifdef HAVE_MUPDF
-// for fz_error():
+// for fz_error() et al:
+#define CTX   ((fz_context *)ctx->allocator->user_context)
+#include "mupdf/assertions.h"
 #include "mupdf/fitz/version.h"
 #include "mupdf/fitz/config.h"
 #include "mupdf/fitz/system.h"
 #include "mupdf/fitz/context.h"
-#include "mupdf/assertions.h"
 
 static inline void fz_lock_jbig2(fz_context* ctx)
 {
