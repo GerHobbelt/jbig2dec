@@ -86,28 +86,28 @@ jbig2_page_info(Jbig2Ctx *ctx, Jbig2Segment *segment, const uint8_t *segment_dat
 
                 if (ctx->max_page_index >= (UINT32_MAX >> 2)) {
                     ctx->max_page_index = UINT32_MAX;
-					return jbig2_error(ctx, JBIG2_SEVERITY_FATAL, segment->number, "too many pages in jbig2 image");
-				}
+                    return jbig2_error(ctx, JBIG2_SEVERITY_FATAL, segment->number, "too many pages in jbig2 image");
+                }
 
-				uint32_t old_size = ctx->max_page_index;
-				ctx->max_page_index <<= 2;
+                uint32_t old_size = ctx->max_page_index;
+                ctx->max_page_index <<= 2;
                 pages = jbig2_renew(ctx, ctx->pages, Jbig2Page, ctx->max_page_index);
                 if (pages == NULL) {
                     return jbig2_error(ctx, JBIG2_SEVERITY_FATAL, segment->number, "failed to reallocate pages");
                 }
                 ctx->pages = pages;
                 for (j = old_size; j < ctx->max_page_index; j++) {
-					ctx->pages[j].state = JBIG2_PAGE_FREE;
-					ctx->pages[j].number = 0;
-					ctx->pages[j].width = 0;
-					ctx->pages[j].height = 0xffffffff;
-					ctx->pages[j].x_resolution = 0;
-					ctx->pages[j].y_resolution = 0;
-					ctx->pages[j].stripe_size = 0;
-					ctx->pages[j].striped = 0;
-					ctx->pages[j].end_row = 0;
-					ctx->pages[j].flags = 0;
-					ctx->pages[j].image = NULL;
+                    ctx->pages[j].state = JBIG2_PAGE_FREE;
+                    ctx->pages[j].number = 0;
+                    ctx->pages[j].width = 0;
+                    ctx->pages[j].height = 0xffffffff;
+                    ctx->pages[j].x_resolution = 0;
+                    ctx->pages[j].y_resolution = 0;
+                    ctx->pages[j].stripe_size = 0;
+                    ctx->pages[j].striped = 0;
+                    ctx->pages[j].end_row = 0;
+                    ctx->pages[j].flags = 0;
+                    ctx->pages[j].image = NULL;
                 }
             }
         }
@@ -372,14 +372,14 @@ jbig2_release_page(Jbig2Ctx *ctx, Jbig2Image *image)
     {
         if (ctx->pages[index].image == image)
         {
-			// as the page is assumed to be obtained from a call to jbig2_page_out(),
-			// we must correct for that one incrementing the reference count upon
-			// delivering the image reference to the userland code: we decrement
-			// the reference counter for that action as well:
-			int rv = jbig2_image_release(ctx, image);
-			ASSERT_AND_CONTINUE(rv == 0);
+            // as the page is assumed to be obtained from a call to jbig2_page_out(),
+            // we must correct for that one incrementing the reference count upon
+            // delivering the image reference to the userland code: we decrement
+            // the reference counter for that action as well:
+            int rv = jbig2_image_release(ctx, image);
+            ASSERT_AND_CONTINUE(rv == 0);
 
-			// now decrement for the pages[] reference itself:
+            // now decrement for the pages[] reference itself:
             rv = jbig2_image_release(ctx, image);
             ASSERT_AND_CONTINUE(rv == 1);
             ctx->pages[index].image = NULL;
