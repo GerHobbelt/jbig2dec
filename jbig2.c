@@ -513,8 +513,8 @@ jbig2_ctx_free(Jbig2Ctx *ctx)
     }
 
     if (ctx->pages != NULL) {
-		ASSERT_AND_CONTINUE(ctx->current_page < ctx->max_page_index);
-		for (i = 0; i < ctx->max_page_index; i++)
+        ASSERT_AND_CONTINUE(ctx->current_page < ctx->max_page_index);
+        for (i = 0; i < ctx->max_page_index; i++)
             if (ctx->pages[i].image != NULL)
             {
                 ASSERT_AND_CONTINUE(i <= ctx->current_page);
