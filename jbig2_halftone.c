@@ -125,7 +125,6 @@ jbig2_hd_release(Jbig2Ctx *ctx, Jbig2PatternDict *dict)
     if (dict->patterns != NULL)
         for (i = 0; i < dict->n_patterns; i++)
         {
-            int refc = dict->patterns[i]->refcount;
             int rv = jbig2_image_release(ctx, dict->patterns[i]);
             ASSERT_AND_CONTINUE(rv == 1);
         }
@@ -313,7 +312,6 @@ jbig2_decode_gray_scale_image(Jbig2Ctx *ctx, Jbig2Segment *segment,
             for (j = i; j > 0;)
             {
                 j--;
-                int refc = GSPLANES[j]->refcount;
                 int rv = jbig2_image_release(ctx, GSPLANES[j]);
                 ASSERT_AND_CONTINUE(rv == 1);
             }
@@ -423,7 +421,6 @@ cleanup:
     }
     for (i = 0; i < GSBPP; ++i)
     {
-        int refc = GSPLANES[i]->refcount;
         int rv = jbig2_image_release(ctx, GSPLANES[i]);
         ASSERT_AND_CONTINUE(rv == 1);
     }
