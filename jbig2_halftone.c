@@ -489,8 +489,8 @@ jbig2_decode_halftone_region(Jbig2Ctx *ctx, Jbig2Segment *segment,
 
         for (mg = 0; mg < params->HGH; ++mg) {
             for (ng = 0; ng < params->HGW; ++ng) {
-                int64_t x = ((int64_t) params->HGX + mg * params->HRY + ng * params->HRX) >> 8;
-                int64_t y = ((int64_t) params->HGY + mg * params->HRX - ng * params->HRY) >> 8;
+                int64_t x = ((int64_t) params->HGX + (int64_t) mg * params->HRY + (int64_t) ng * params->HRX) >> 8;
+                int64_t y = ((int64_t) params->HGY + (int64_t) mg * params->HRX - (int64_t) ng * params->HRY) >> 8;
 
                 if (x + HPATS->HPW <= 0 || x >= image->width || y + HPATS->HPH <= 0 || y >= image->height) {
                     jbig2_image_set_pixel(HSKIP, ng, mg, 1);
@@ -521,8 +521,8 @@ jbig2_decode_halftone_region(Jbig2Ctx *ctx, Jbig2Segment *segment,
     /* 6.6.5 point 5. place patterns with procedure mentioned in 6.6.5.2 */
     for (mg = 0; mg < params->HGH; ++mg) {
         for (ng = 0; ng < params->HGW; ++ng) {
-            int64_t x = ((int64_t) params->HGX + mg * params->HRY + ng * params->HRX) >> 8;
-            int64_t y = ((int64_t) params->HGY + mg * params->HRX - ng * params->HRY) >> 8;
+            int64_t x = ((int64_t) params->HGX + (int64_t) mg * params->HRY + (int64_t) ng * params->HRX) >> 8;
+            int64_t y = ((int64_t) params->HGY + (int64_t) mg * params->HRX - (int64_t) ng * params->HRY) >> 8;
 
             /* prevent pattern index >= HNUMPATS */
             gray_val = GI[ng][mg];
