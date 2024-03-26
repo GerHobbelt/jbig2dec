@@ -472,7 +472,7 @@ jbig2_image_get_pixel(Jbig2Image *image, int x, int y)
 {
     const int w = image->width;
     const int h = image->height;
-    const int byte = (x >> 3) + y * image->stride;
+    const size_t byte = (x >> 3) + (size_t) y * image->stride;
     const int bit = 7 - (x & 7);
 
     if ((x < 0) || (x >= w))
@@ -490,14 +490,15 @@ jbig2_image_set_pixel(Jbig2Image *image, int x, int y, bool value)
     const int w = image->width;
     const int h = image->height;
     int scratch, mask;
-    int bit, byte;
+    size_t byte;
+    int bit;
 
     if ((x < 0) || (x >= w))
         return;
     if ((y < 0) || (y >= h))
         return;
 
-    byte = (x >> 3) + y * image->stride;
+    byte = (x >> 3) + (size_t) y * image->stride;
     bit = 7 - (x & 7);
     mask = (1 << bit) ^ 0xff;
 
