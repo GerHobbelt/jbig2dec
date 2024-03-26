@@ -479,7 +479,7 @@ jbig2_decode_halftone_region(Jbig2Ctx *ctx, Jbig2Segment *segment,
     }
 
     /* 6.6.5 point 1. Fill bitmap with HDEFPIXEL */
-    memset(image->data, params->HDEFPIXEL, image->stride * image->height);
+    memset(image->data, params->HDEFPIXEL, (size_t) image->stride * image->height);
 
     /* 6.6.5 point 2. compute HSKIP according to 6.6.5.1 */
     if (params->HENABLESKIP == 1) {
