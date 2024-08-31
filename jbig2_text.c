@@ -424,17 +424,6 @@ cleanup1:
                 }
 
                 if (code1 < 0 || code2 < 0 || code3 < 0 || code4 < 0 || code5 < 0 || code6 < 0) {
-                    if (jbig2_image_release(ctx, IB) != 0 && IB)
-                    {
-                        ASSERT(IB_id >= 0);
-                        ASSERT(IB_index >= 0);
-                        ASSERT(dicts[IB_index]->glyphs[IB_id] == IB || dicts[IB_index]->glyphs[IB_id] == NULL);
-                        dicts[IB_index]->glyphs[IB_id] = NULL;
-
-                        IB = NULL;
-                        IB_id = -1;
-                        IB_index = -1;
-                    }
                     code = jbig2_error(ctx, JBIG2_SEVERITY_WARNING, segment->number, "failed to decode data");
                     goto cleanup2;
                 }
