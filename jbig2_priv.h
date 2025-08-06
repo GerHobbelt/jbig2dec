@@ -162,4 +162,25 @@ void jbig2_word_stream_buf_free(Jbig2Ctx *ctx, Jbig2WordStream *ws);
 #define JBIG2_RESTRICT
 #endif
 
+#include <libassert/assert.h>
+
+#if !defined(NDEBUG)
+
+// expr1 is expected to have side effects, expr2 DOES NOT.
+//
+// expr1 is the code that should ALWAYS be kept alive.
+#define VERIFY_AND_CONTINUE_EQ(expr1, expr2) 												\
+		do { \
+			const int rv_ ## __LINE__ = (expr1); \
+			const int cmp_ ## __LINE__ = (expr2); \
+			LIBASSERT_INVOKE(rv_ ## __LINE__ == cmp_ ## __LINE__, "VERIFY_AND_CONTINUE_EQ", assumption, LIBASSERT_ASSUME_ACTION, "verify failed: %d != %d", rv_ ## __LINE__, cmp_ ## __LINE__); \
+		} while (0)
+
+#else
+
+#define VERIFY_AND_CONTINUE_EQ(expr1, expr2) 												\
+		((void)(expr1))
+
+#endif
+
 #endif /* _JBIG2_PRIV_H */
