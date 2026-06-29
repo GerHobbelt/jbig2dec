@@ -352,8 +352,10 @@ work similarly. */
 static inline int
 jbig2_image_get_pixel_fast(Jbig2Image *image, int64_t x, int64_t y)
 {
-    const int byte = (x >> 3) + y * image->stride;
-    const int bit = 7 - (x & 7);
+    size_t sx = (size_t) x;
+    size_t sy = (size_t) y;
+    size_t byte = (sx >> 3) + sy * image->stride;
+    int bit = 7 - ((int) (sx & 7));
 
     return ((image->data[byte] >> bit) & 1);
 }
@@ -397,7 +399,7 @@ jbig2_decode_generic_template0(Jbig2Ctx *ctx,
         uint32_t CONTEXT;
         uint32_t line_m1;
         uint32_t line_m2;
-        uint32_t padded_width = (GBW + 7) & -8;
+        int64_t padded_width = (GBW + 7) & -8;
 
         line_m1 = line1 ? line1[0] : 0;
         line_m2 = line2 ? line2[0] << 6 : 0;
@@ -406,8 +408,8 @@ jbig2_decode_generic_template0(Jbig2Ctx *ctx,
         /* 6.2.5.7 3d */
         for (x = 0; x < padded_width; x += 8) {
             byte result = 0;
-            int x_minor;
-            int minor_width = GBW - x > 8 ? 8 : GBW - x;
+            int64_t x_minor;
+            int64_t minor_width = GBW - x > 8 ? 8 : GBW - x;
 
             if (line1)
                 line_m1 = (line_m1 << 8) | (x + 8 < GBW ? line1[(x >> 3) + 1] : 0);
@@ -610,7 +612,7 @@ jbig2_decode_generic_template1(Jbig2Ctx *ctx,
         uint32_t CONTEXT;
         uint32_t line_m1;
         uint32_t line_m2;
-        uint32_t padded_width = (GBW + 7) & -8;
+        int64_t padded_width = (GBW + 7) & -8;
 
         line_m1 = line1 ? line1[0] : 0;
         line_m2 = line2 ? line2[0] << 5 : 0;
@@ -619,8 +621,8 @@ jbig2_decode_generic_template1(Jbig2Ctx *ctx,
         /* 6.2.5.7 3d */
         for (x = 0; x < padded_width; x += 8) {
             byte result = 0;
-            int x_minor;
-            int minor_width = GBW - x > 8 ? 8 : GBW - x;
+            int64_t x_minor;
+            int64_t minor_width = GBW - x > 8 ? 8 : GBW - x;
 
             if (line1)
                 line_m1 = (line_m1 << 8) | (x + 8 < GBW ? line1[(x >> 3) + 1] : 0);
@@ -744,7 +746,7 @@ jbig2_decode_generic_template2(Jbig2Ctx *ctx,
         uint32_t CONTEXT;
         uint32_t line_m1;
         uint32_t line_m2;
-        uint32_t padded_width = (GBW + 7) & -8;
+        int64_t padded_width = (GBW + 7) & -8;
 
         line_m1 = line1 ? line1[0] : 0;
         line_m2 = line2 ? line2[0] << 4 : 0;
@@ -753,8 +755,8 @@ jbig2_decode_generic_template2(Jbig2Ctx *ctx,
         /* 6.2.5.7 3d */
         for (x = 0; x < padded_width; x += 8) {
             byte result = 0;
-            int x_minor;
-            int minor_width = GBW - x > 8 ? 8 : GBW - x;
+            int64_t x_minor;
+            int64_t minor_width = GBW - x > 8 ? 8 : GBW - x;
 
             if (line1)
                 line_m1 = (line_m1 << 8) | (x + 8 < GBW ? line1[(x >> 3) + 1] : 0);
@@ -809,7 +811,7 @@ jbig2_decode_generic_template3(Jbig2Ctx *ctx,
     for (y = 0; y < GBH; y++) {
         uint32_t CONTEXT;
         uint32_t line_m1;
-        uint32_t padded_width = (GBW + 7) & -8;
+        int64_t padded_width = (GBW + 7) & -8;
 
         line_m1 = line1 ? line1[0] : 0;
         CONTEXT = (line_m1 >> 1) & 0x3f0;
@@ -817,8 +819,8 @@ jbig2_decode_generic_template3(Jbig2Ctx *ctx,
         /* 6.2.5.7 3d */
         for (x = 0; x < padded_width; x += 8) {
             byte result = 0;
-            int x_minor;
-            int minor_width = GBW - x > 8 ? 8 : GBW - x;
+            int64_t x_minor;
+            int64_t minor_width = GBW - x > 8 ? 8 : GBW - x;
 
             if (line1)
                 line_m1 = (line_m1 << 8) | (x + 8 < GBW ? line1[(x >> 3) + 1] : 0);
@@ -900,7 +902,7 @@ jbig2_decode_generic_template3_unopt(Jbig2Ctx *ctx,
 }
 
 static void
-copy_prev_row(Jbig2Image *image, int row)
+copy_prev_row(Jbig2Image *image, int64_t row)
 {
     if (!row) {
         /* no previous row */
@@ -924,7 +926,7 @@ jbig2_decode_generic_template0_TPGDON(Jbig2Ctx *ctx,
     int64_t x, y;
     int LTP = 0;
     int gmin, gmax;
-    uint32_t left, right, top;
+    int64_t left, right, top;
 
     if (pixel_outside_field(params->gbat[0], params->gbat[1]) ||
         pixel_outside_field(params->gbat[2], params->gbat[3]) ||
@@ -1017,9 +1019,9 @@ jbig2_decode_generic_template0_TPGDON(Jbig2Ctx *ctx,
         gmin = params->gbat[6];
     if (gmax < params->gbat[6])
         gmax = params->gbat[6];
-    if ((int)left < -gmin)
-        left = -gmin;
-    if ((int)right < gmax)
+    if (left < -((int64_t) gmin))
+        left = -((int64_t) gmin);
+    if (right < gmax)
         right = gmax;
     if (right > GBW)
         right = GBW;
@@ -1036,8 +1038,8 @@ jbig2_decode_generic_template0_TPGDON(Jbig2Ctx *ctx,
         gmin = params->gbat[5];
     if (params->gbat[7] < gmin)
         gmin = params->gbat[7];
-    if ((int)top < -gmin)
-        top = -gmin;
+    if (top < -((int64_t) gmin))
+        top = -((int64_t) gmin);
     /* So 0 <= y < top needs bounds checking. */
 
     for (y = 0; y < GBH; y++) {
