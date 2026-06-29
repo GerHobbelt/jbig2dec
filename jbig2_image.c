@@ -96,6 +96,7 @@ jbig2_image_new(Jbig2Ctx *ctx, uint32_t width, uint32_t height)
 Jbig2Image *
 jbig2_image_reference(Jbig2Ctx *ctx, Jbig2Image *image)
 {
+    (void) ctx;
     if (image)
     {
         fz_lock_jbig2(fz_get_global_context());
@@ -410,6 +411,8 @@ jbig2_image_compose(Jbig2Ctx *ctx, Jbig2Image *dst, Jbig2Image *src, int x, int 
     uint32_t bytewidth;
     uint32_t syoffset = 0;
 
+    (void) ctx;
+
     if (src == NULL)
         return 0;
 
@@ -528,6 +531,8 @@ jbig2_image_clear(Jbig2Ctx *ctx, Jbig2Image *image, int value)
 {
     const uint8_t fill = value ? 0xFF : 0x00;
 
+    (void) ctx;
+
     memset(image->data, fill, (size_t) image->stride * image->height);
 }
 
@@ -536,10 +541,10 @@ jbig2_image_clear(Jbig2Ctx *ctx, Jbig2Image *image, int value)
    the template code
 */
 int
-jbig2_image_get_pixel(Jbig2Image *image, int x, int y)
+jbig2_image_get_pixel(Jbig2Image *image, int64_t x, int64_t y)
 {
-    const int w = image->width;
-    const int h = image->height;
+    const int64_t w = image->width;
+    const int64_t h = image->height;
     const size_t byte = (x >> 3) + (size_t) y * image->stride;
     const int bit = 7 - (x & 7);
 
@@ -553,10 +558,10 @@ jbig2_image_get_pixel(Jbig2Image *image, int x, int y)
 
 /* set an individual pixel value in an image */
 void
-jbig2_image_set_pixel(Jbig2Image *image, int x, int y, int value)
+jbig2_image_set_pixel(Jbig2Image *image, int64_t x, int64_t y, int value)
 {
-    const int w = image->width;
-    const int h = image->height;
+    const int64_t w = image->width;
+    const int64_t h = image->height;
     int scratch, mask;
     size_t byte;
     int bit;
