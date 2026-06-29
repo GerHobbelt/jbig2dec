@@ -62,13 +62,17 @@ int atexit(void (*)(void));
 #endif
 
 /* Hacks to portably print large sizes */
-#ifdef _MSC_VER
+#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
+#define FMTZ "%zu"
+#define FMTZ_CAST size_t
+#define FMTP "%p"
+#elif defined(_MSC_VER)
 #define FMTZ "%llu"
 #define FMTZ_CAST _int64
 #define FMTP "0x%p"
 #else
-#define FMTZ "%zu"
-#define FMTZ_CAST size_t
+#define FMTZ "%lu"
+#define FMTZ_CAST unsigned long
 #define FMTP "%p"
 #endif
 
@@ -555,7 +559,7 @@ static void print_stack_libbt_failed(void *addr)
     if (gdb_invocation_failed == 0)
     {
         snprintf(command, sizeof(command),
-                 //"gdb -q --batch -p=%i -ex 'info line *%p' -ex quit 2>/dev/null",
+                 /*"gdb -q --batch -p=%i -ex 'info line *%p' -ex quit 2>/dev/null", */
                  "gdb -q --batch -p=%i -ex 'info line *%p' -ex quit 2>/dev/null| egrep -v '(Thread debugging using)|(Using host libthread_db library)|(A debugging session is active)|(will be detached)|(Quit anyway)|(No such file or directory)|(^0x)|(^$)'",
                  getpid(), addr);
     printf("%s\n", command);
@@ -725,20 +729,20 @@ typedef BOOL (__stdcall *My_SymGetLineFromAddrType)(HANDLE hProcess, DWORD_NATIV
 
 typedef struct MY_SYMBOL_INFO {
     ULONG       SizeOfStruct;
-    ULONG       TypeIndex;        // Type Index of symbol
+    ULONG       TypeIndex;        /* Type Index of symbol */
     ULONG64     Reserved[2];
     ULONG       info;
     ULONG       Size;
-    ULONG64     ModBase;          // Base Address of module containing this symbol
+    ULONG64     ModBase;          /* Base Address of module containing this symbol */
     ULONG       Flags;
-    ULONG64     Value;            // Value of symbol, ValuePresent should be 1
-    ULONG64     Address;          // Address of symbol including base address of module
-    ULONG       Register;         // register holding value or pointer to value
-    ULONG       Scope;            // scope of the symbol
-    ULONG       Tag;              // pdb classification
-    ULONG       NameLen;          // Actual length of name
+    ULONG64     Value;            /* Value of symbol, ValuePresent should be 1 */
+    ULONG64     Address;          /* Address of symbol including base address of module */
+    ULONG       Register;         /* register holding value or pointer to value */
+    ULONG       Scope;            /* scope of the symbol */
+    ULONG       Tag;              /* pdb classification */
+    ULONG       NameLen;          /* Actual length of name */
     ULONG       MaxNameLen;
-    CHAR        Name[1];          // Name of symbol
+    CHAR        Name[1];          /* Name of symbol */
 } MY_SYMBOL_INFO, *MY_PSYMBOL_INFO;
 
 typedef BOOL (__stdcall *My_SymFromAddrType)(HANDLE hProcess, DWORD64 Address, PDWORD64 Displacement, MY_PSYMBOL_INFO Symbol);
@@ -2687,7 +2691,7 @@ static int Memento_Internal_checkAllFreed(Memento_BlkHeader *memblk, void *arg)
         showBlock(memblk, ' ');
         if (data->freeCorrupt) {
             fprintf(stderr, " index %d (address "FMTP") onwards", (int)data->index,
-                    &((char *)MEMBLK_TOBLK(memblk))[data->index]);
+                    (void *) &((char *)MEMBLK_TOBLK(memblk))[data->index]);
             if (data->preCorrupt) {
                 fprintf(stderr, "+ preguard");
             }

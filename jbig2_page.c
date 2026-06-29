@@ -34,6 +34,10 @@
 #include "jbig2_page.h"
 #include "jbig2_segment.h"
 
+#ifdef OUTPUT_PBM
+#include "jbig2_image_rw.h"
+#endif
+
 #ifdef HAVE_MUPDF
 #define CTX   ((fz_context *)ctx->allocator->user_context)
 #include "mupdf/assertions.h"

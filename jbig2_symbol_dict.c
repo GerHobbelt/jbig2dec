@@ -44,7 +44,9 @@
 #include "jbig2_segment.h"
 #include "jbig2_symbol_dict.h"
 #include "jbig2_text.h"
+#ifdef OUTPUT_PBM
 #include "jbig2_image_rw.h"
+#endif
 
 #ifdef HAVE_MUPDF
 #define CTX   ((fz_context *)ctx->allocator->user_context)
@@ -550,7 +552,7 @@ jbig2_decode_symbol_dict(Jbig2Ctx *ctx,
                         Jbig2RefinementRegionParams rparams = { 0 };
                         uint32_t ID;
                         int32_t RDX, RDY;
-                        int BMSIZE = 0;
+                        size_t BMSIZE = 0;
                         uint32_t ninsyms = params->SDNUMINSYMS;
                         int code1 = 0;
                         int code2 = 0;
